@@ -66,9 +66,10 @@ void sqrt_program(char* x){
     }
 }
 
-int * shellsort(int* elems,int size){
-    int * sorted_elem = malloc(size);
-    int num = size/sizeof(int);
+int * shellsort(int* elems,int size,int* new_num){
+    int * sorted_elem = (int*)malloc(sizeof(int)*size);
+    int num = size;
+    *new_num = size;
     for(int i = 0; i < num; i++){
        sorted_elem[i] = elems[i] ;
     }
@@ -90,12 +91,12 @@ int * shellsort(int* elems,int size){
     for(int i = 0; i < num ; i++){
         printf("%d, ",sorted_elem[i]);
     }
-    printf("\b]\n");
+    printf("\b\b]\n");
     return sorted_elem;
 }
 
 int is_sorted(int * elem,int size){
-    for(int i = 0; i < size; i++){
+    for(int i = 0; i < size-1; i++){
         if(elem[i] > elem[i+1]){
             return 0;
         }
@@ -155,10 +156,42 @@ int main(int argc,char* argv[]){
     double x = my_sqrt_checked(2.0);
     printf("%f \n",x);
     */
-    int arr1[] = {5,1,4,2,3,7};
-    int arr2[] = {1,4,5,7,3,2};
-    int *tmp = shellsort(arr1,sizeof(arr1));
-    printf("%d\n",is_sorted(tmp,sizeof(tmp)/sizeof(int)));
-    printf("%d\n",is_permutation(arr1,sizeof(arr1)/sizeof(int),arr2,sizeof(arr2)/sizeof(int)));
+
+    // int arr1[] = {5,1,4,2,3,7};
+    // int arr2[] = {1,4,5,7,3,2};
+    // int *tmp = shellsort(arr1,sizeof(arr1)/sizeof(int));
+    // printf("%ld size\n",sizeof(*tmp));
+    // // printf("%ld %ld size\n",sizeof(arr1)/sizeof(int),sizeof(tmp)/sizeof(int));
+    // if(!is_sorted(tmp,sizeof(tmp)/sizeof(int))){
+    //      printf("it's not sorted\n");
+    // }
+    // if(!is_permutation(arr1,sizeof(arr1)/sizeof(int),tmp,sizeof(tmp)/sizeof(int))){
+    //      printf("it's not same array\n");
+    // }
+
+
+
+    //Exercise2
+    /*
+    srand(time(NULL));
+    for(int i =0; i <1000; i++){
+        int num = rand()%100;
+        int temp_arr[num];
+        for(int j = 0; j <num; j++){
+            temp_arr[j] = rand()%1000;
+        }
+        int sorted_leng = 0;
+        int *sorted_temp = shellsort(temp_arr,num,&sorted_leng);
+        if(!is_sorted(sorted_temp,num)){
+            printf("it's not sorted\n");
+            continue;
+        }
+        if(!is_permutation(temp_arr,num,sorted_temp,sorted_leng)){
+            printf("it's not same array\n");
+            continue;
+        }
+        free(sorted_temp);
+    }
+    */
     return 0;
 }
