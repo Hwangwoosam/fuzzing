@@ -36,24 +36,6 @@ int * shellsort(int* elems,int size,int* new_num){
     return sorted_elem;
 }
 
-double my_sqrt(double x){
-    double approx = 0;
-    double guess = x/2;
-    while(approx != guess){
-        approx = guess;
-        guess = (approx + x/approx)/2;
-    }
-    return approx;
-}
-
-double my_sqrt_fixed(double x){
-    assert(0 <= x);
-    if(x == 0){
-        return 0;
-    }
-    return my_sqrt(x);
-}
-
 int is_sorted(int * elem,int size){
     for(int i = 0; i < size-1; i++){
         if(elem[i] > elem[i+1]){
