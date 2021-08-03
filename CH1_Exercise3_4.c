@@ -107,6 +107,8 @@ void Testcase_Exer3(){
     quadratic_printf(quadratic_solver(1,1,-1));
 }
 
+// compute the chances of discovering the problem and
+// How long would one have to wait on average until a bug gets triggered?
 void Testcase_3_part3(){
     unsigned long long chance = 1;
     chance = pow(2,63);
@@ -119,6 +121,7 @@ void Testcase_3_part3(){
     printf("%f take long\n",year);
 }
 
+//set the value to infinity
 void Testcase_Exer4(){
     printf("\nTestcase of Exercise 4\n");
     float tmp =  __FLT_MAX__;
