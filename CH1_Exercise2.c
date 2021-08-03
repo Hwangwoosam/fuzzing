@@ -66,11 +66,8 @@ int is_permutation(int* a,int a_size,int *b,int b_size){
     return 1;
 }
 
-int main(){
-    
-    srand(time(NULL));
-
-    // array size : 0 ~ 999 , elemnet range 0~ 999;
+void Testcase_random(){
+     // array size : 0 ~ 999 , elemnet range 0~ 999;
     for(int i =0; i <1000; i++){
         int num = rand()%1000;
         int temp_arr[num];
@@ -81,11 +78,11 @@ int main(){
         int *sorted_temp = shellsort(temp_arr,num,&sorted_leng);
         if(!is_sorted(sorted_temp,num)){
             printf("it's not sorted\n");
-            continue;
+            break;
         }
         if(!is_permutation(temp_arr,num,sorted_temp,sorted_leng)){
             printf("it's not same array\n");
-            continue;
+            break;
         }
         free(sorted_temp);
     }
@@ -101,11 +98,11 @@ int main(){
         int *sorted_temp = shellsort(temp_arr,num,&sorted_leng);
         if(!is_sorted(sorted_temp,num)){
             printf("it's not sorted\n");
-            continue;
+            break;
         }
         if(!is_permutation(temp_arr,num,sorted_temp,sorted_leng)){
             printf("it's not same array\n");
-            continue;
+            break;
         }
         free(sorted_temp);
     }
@@ -121,12 +118,17 @@ int main(){
         int *sorted_temp = shellsort(temp_arr,num,&sorted_leng);
         if(!is_sorted(sorted_temp,num)){
             printf("it's not sorted\n");
-            continue;
+            break;
         }
         if(!is_permutation(temp_arr,num,sorted_temp,sorted_leng)){
             printf("it's not same array\n");
-            continue;
+            break;
         }
         free(sorted_temp);
     }
+}
+
+int main(){
+    srand(time(NULL));
+    Testcase_random();  
 }
