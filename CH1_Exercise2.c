@@ -90,7 +90,7 @@ int main(){
         free(sorted_temp);
     }
 
-    // array size : 0~ 999 , element range -500~500
+    // array size : 0~ 999 , element range -500~ 499
     for(int i =0; i <1000; i++){
         int num = rand()%1000;
         int temp_arr[num];
@@ -110,7 +110,7 @@ int main(){
         free(sorted_temp);
     }
     
-    // array size : 0~ 999 , element range -1000~0
+    // array size : 0~ 999 , element range -1000 ~ -1
      for(int i =0; i <1000; i++){
         int num = rand()%1000;
         int temp_arr[num];
