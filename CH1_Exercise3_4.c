@@ -99,6 +99,10 @@ int main(){
     // a > 0 , b > 0   --> q < 0
     quadratic_printf(quadratic_solver(1,1,1)); 
     
+    // c > 0
+    // a > 0 , b > 0   --> q > 0
+    quadratic_printf(quadratic_solver(1,3,1)); 
+
     // c < 0 
     // a > 0 , b > 0   --> q > 0
     quadratic_printf(quadratic_solver(1,1,-1));
