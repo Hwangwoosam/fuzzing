@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <stdlib.h>
 #include <time.h>
 #include <ctype.h>
 #include <string.h>
@@ -105,7 +104,7 @@ int * shellsort(int* elems,int size,int* new_num){
 }
 
 double my_sqrt_fixed(double x){
-    assert(0 < x);
+    assert(0 <= x);
     if(x == 0){
         return 0;
     }
@@ -152,7 +151,6 @@ pair_t quadratic_solver(int a,int b,int c){
                 temp.flag_y = 1;
                 return temp; 
             }else{
-
                 temp.flag_x = 1;
                 temp.flag_y = 1;
                 return temp;
@@ -261,16 +259,26 @@ int main(int argc,char* argv[]){
     }
     */
 
-   //Exercise3
-   //1000¹ø 0.015625 sec
+   Exercise3
+   1000¹ø 0.015625 sec
     unsigned long long chance = 1;
-    for(int i = 0; i < 64; i++){
-        chance *= 2;
-    }
-    printf("%lld chace\n",chance);
+    chance = pow(2,63);
+        // chance *= 2;
+    unsigned long long testtime = 1000000000;
+    unsigned long long result = chance/testtime;
+    unsigned long long minutes = result/60;
+    unsigned long long hour = minutes/60;
+    unsigned long long day = hour/24;
+    unsigned long long year = day*2/365;
+    printf("%lld chace\n",year);
     
-    // // float tmp =  __FLT_MAX__;
-    // tmp = tmp*1000;
-    // printf("%f infinity\n",my_sqrt_fixed(tmp));
+
+    //Excercise4
+    /*
+    float tmp =  __FLT_MAX__;
+    tmp = tmp*1000;
+    // printf("%f size\n",tmp);
+    printf("%f infinity\n",my_sqrt_fixed(tmp));
+    */
     return 0;
 }
