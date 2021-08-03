@@ -82,8 +82,7 @@ void quadratic_printf(pair_t result){
     }
 }
 
-int main(){
-    
+void Testcase_Exer3(){
     //Exercise3
     printf("Testcase of Exercise3\n");
     // a  == 0, b == 0  --> q == 0
@@ -106,8 +105,9 @@ int main(){
     // c < 0 
     // a > 0 , b > 0   --> q > 0
     quadratic_printf(quadratic_solver(1,1,-1));
-    
-    //part 3
+}
+
+void Testcase_3_part3(){
     unsigned long long chance = 1;
     chance = pow(2,63);
     double testtime = 1000000000;
@@ -117,11 +117,18 @@ int main(){
     double day = hour/24;
     double year = day*2/365;
     printf("%f take long\n",year);
-    
-    //Exercise 4
+}
+
+void Testcase_Exer4(){
     printf("\nTestcase of Exercise 4\n");
     float tmp =  __FLT_MAX__;
     tmp = tmp*1000;
     printf("%f size\n",tmp);
     printf("%f infinity\n",my_sqrt_fixed(tmp));
+}
+
+int main(){
+    Testcase_Exer3();
+    Testcase_3_part3();
+    Testcase_Exer4();
 }
