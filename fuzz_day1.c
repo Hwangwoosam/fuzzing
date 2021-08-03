@@ -6,11 +6,20 @@
 #include <time.h>
 #include <ctype.h>
 #include <string.h>
+#include <math.h>
 
 void assertEquals(double x,double y){
     double temp = abs(x-y);
     assert(temp < EPSILON);
 }
+
+typedef struct pair{
+    double x;
+    double y;
+    int flag_x;
+    int flag_y;
+}pair_t;
+
 double my_sqrt(double x){
     double approx = 0;
     double guess = x/2;
@@ -95,6 +104,14 @@ int * shellsort(int* elems,int size,int* new_num){
     return sorted_elem;
 }
 
+double my_sqrt_fixed(double x){
+    assert(0 < x);
+    if(x == 0){
+        return 0;
+    }
+    return my_sqrt(x);
+}
+
 int is_sorted(int * elem,int size){
     for(int i = 0; i < size-1; i++){
         if(elem[i] > elem[i+1]){
@@ -125,6 +142,57 @@ int is_permutation(int* a,int a_size,int *b,int b_size){
     return 1;
 }
 
+pair_t quadratic_solver(int a,int b,int c){
+    pair_t temp;
+    if(a == 0){
+        if(b == 0){
+            if(c == 0){
+                temp.x = 0;
+                temp.flag_x = 0;
+                temp.flag_y = 1;
+                return temp; 
+            }else{
+
+                temp.flag_x = 1;
+                temp.flag_y = 1;
+                return temp;
+            }
+        }else{
+            temp.x = -c/b;
+            temp.flag_x = 0;
+            temp.flag_y = 1;
+            return temp;
+        }
+    }
+    double q = b*b - 4*a*c;
+    if(q < 0){
+        temp.flag_x = 1;
+        temp.flag_y = 1;
+        return temp;
+    }
+    if(q == 0){
+        temp.x = -b/(2*a);
+        temp.flag_x = 0;
+        temp.flag_y = 1;
+        return temp;
+    }
+    double solution_1 = (-b + my_sqrt_fixed(q)) /(2*a);
+    double solution_2 = (-b + my_sqrt_fixed(q)) /(2*a);
+    temp.x = solution_1;
+    temp.y = solution_2;
+    return temp; 
+}
+
+void quadratic_printf(pair_t result){
+    if(result.flag_x == 0 && result.flag_y == 1){
+        printf("(%f, None)\n",result.x);
+    }else if(result.flag_x == 1 && result.flag_y == 1){
+        printf("(None, None)\n");
+    }else{
+        printf("(%f, %f)\n",result.x,result.y);
+    }
+}
+
 int main(int argc,char* argv[]){
 
     /*
@@ -151,7 +219,6 @@ int main(int argc,char* argv[]){
     printf("%f excute time\n",(float)(end-start)/CLOCKS_PER_SEC);
     */
     //Run-Time verification
-    //
     /*
     double x = my_sqrt_checked(2.0);
     printf("%f \n",x);
@@ -193,5 +260,17 @@ int main(int argc,char* argv[]){
         free(sorted_temp);
     }
     */
+
+   //Exercise3
+   //1000¹ø 0.015625 sec
+    unsigned long long chance = 1;
+    for(int i = 0; i < 64; i++){
+        chance *= 2;
+    }
+    printf("%lld chace\n",chance);
+    
+    // // float tmp =  __FLT_MAX__;
+    // tmp = tmp*1000;
+    // printf("%f infinity\n",my_sqrt_fixed(tmp));
     return 0;
 }
