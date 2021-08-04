@@ -13,12 +13,12 @@
 char template[] = "tmp.XXXXXX";
 char *dir_name;
 
-typedef struct file_info{
-    char* data;
-    int length;
-}file_info_t;
 
-char * fuzzer(int max_length,int char_start,int char_range,int * length){
+int pipes[2]; //stdin 0 read 1 write
+int pipes2[2];//stderr
+
+
+char * fuzzer(int max_length,int char_start,int char_range){
     int string_length = rand()%(max_length+1);
     char* out = (char*)malloc(sizeof(char)*string_length);
 
@@ -26,45 +26,12 @@ char * fuzzer(int max_length,int char_start,int char_range,int * length){
         char tmp = rand()%(char_range) + char_start;
         out[i] = tmp;
     }
-    *length = string_length;
-
     return out;
-}
-
-file_info_t write_f(char* name,char* data,int length){
-    int dir_length = strlen(dir_name);
-    int name_length = strlen(name);
-    char* file = (char*)malloc(sizeof(char)*(dir_length+name_length+1));
-    strcpy(file,dir_name);
-    strcat(file,"/");
-    strcat(file,name);
-
-    FILE* fp = fopen(file,"w");
-    if(fp == NULL){
-        printf("failed\n");
-    }
-
-    file_info_t temp;
-    temp.data = (char*)malloc(sizeof(char)*length);
-    strcpy(temp.data,data);
-    // temp.data = fuzzer(1000,'a',26,&temp.length);
-    fwrite(temp.data,sizeof(char),temp.length,fp);
-    fclose(fp);
-    return temp;
-}
-
-file_info_t read_f(char* name,int length){
-    FILE* fp = fopen(name,"r");
-    file_info_t temp;
-    temp.length = length;
-    temp.data = (char*)malloc(sizeof(char)*length);
-    fread(temp.data,sizeof(char),temp.length,fp);
-    fclose(fp);
-    return temp;
 }
 
 void temp_file_make(char* file){
     FILE * fp = fopen(file,"w+");
+    // printf("%s\n",file);
     if(fp == NULL){
         printf("temp make failed\n");
     }
@@ -90,67 +57,106 @@ void temp_file_close(){
     }
 }
 
-void subprocess_run(char* argv[],int argc,int stdin_flag, int stdout_flag, int stderr_flag){
+void subprocess_run(char* program,char* data,int num,int data_size){
     int std_out,std_err;
-    dir_name = mkdtemp(template);
-    printf("flag\n");
-
-    if(stdout_flag == 1){
-        char temp[128];
-        strcpy(temp,dir_name);
-        printf("%s \n",temp);
-        strcat(temp,"/std_out.txt");
-        printf("%s \n",temp);
-        temp_file_make(temp);
-        std_out = open(temp,O_RDWR|O_CREAT);
-        printf("1\n");
-        dup2(std_out,STDOUT_FILENO);
+    //input = dir_name[0], out = dir_name[1] , err = dir_name[2]
+    if(dir_name == 0x0){
+        dir_name = mkdtemp(template);
     }
+    char input_temp[128];
+    char out_temp[128];
+    char err_temp[128];
+    char number[64];
+    sprintf(number,"%d",num);
+    // char input_name[20] = "input.txt";
+    // char output_name[20] ="output.txt";
+    strcpy(input_temp,dir_name);
+    strcat(input_temp,"/");
+    strcat(input_temp,number);
+    strcpy(out_temp,input_temp);
+    strcpy(err_temp,input_temp);
+    strcat(err_temp,"error.txt");
+    strcat(out_temp,"output.txt");
+    strcat(input_temp, "input.txt");
+    temp_file_make(err_temp);
+    temp_file_make(input_temp);
+    temp_file_make(out_temp);
 
-    if(stderr_flag == 1){
-        char temp2[128];
-        strcpy(temp2,dir_name);
-        strcat(temp2,"/std_err.txt");
-        temp_file_make(temp2);
-        std_err = open(temp2,O_RDWR|O_CREAT);
-        printf("2\n");
-        dup2(std_err,STDERR_FILENO); 
+    FILE * tmp = fopen(input_temp,"w");
+    fwrite(data,1,data_size,tmp);
+    fclose(tmp);
+    // std_out = open(temp,O_RDWR|O_CREAT);
+    // dup2(std_out,STDOUT_FILENO);
+
+    // char temp2[128];
+    // strcpy(temp2,dir_name);
+    // strcat(temp2,"/std_err.txt");
+    // temp_file_make(temp2);
+    // std_err = open(temp2,O_RDWR|O_CREAT);
+    // dup2(std_err,STDERR_FILENO); 
+     if (pipe(pipes) != 0) {
+        perror("pipe") ;
+        exit(1) ;
     }
-
-    printf("execl help\n");
+     if (pipe(pipes2) != 0) {
+        perror("pipe2") ;
+        exit(1) ;
+    }
     int return_code;
     pid_t child = fork();
     if(child == 0){
         char temp3[128] = "/bin/";
-        strcat(temp3,argv[0]);
-        execl(temp3,temp3,"-q",argv[1],(char*)0);
+        close(pipes[0]);
+        close(pipes2[0]);
+        dup2(pipes[1],0);
+        dup2(pipes[1],1);
+        dup2(pipes2[1],2);
+        strcat(temp3,program);
+        execlp(temp3,temp3,"-q",input_temp,(char*)0);
+
+    }else if(child > 0){
+        close(pipes[1]);
+        close(pipes2[1]);
+        char buf[1024];
+        int s;
+        FILE * out = fopen(out_temp,"w+");
+        while((s=read(pipes[0],buf,1023))>0){
+            buf[s] = 0x0;
+            fwrite(buf,1,s,out);
+        }
+        fclose(out);
+        FILE * err = fopen(err_temp,"w+");
+        char buf2[1024];
+        int s2;
+        while((s2=read(pipes2[0],buf2,1023))>0){
+            buf2[s2] = 0x0;
+            printf("%s",buf2);
+            fwrite(buf2,1,s2,err);
+        }
+        fclose(err);
     }
-    printf("end\n");
-    // dup2(STDOUT_FILENO,2);
     wait(&return_code);
-    temp_file_close();
+    // temp_file_close();
 }
-
-
 
 int main(){
     //Test
     srand(time(NULL));
-    for(int i = 0; i < 100;i++){
-        // printf("%d :i\n",i);
-        int length;
-        char* data = fuzzer(100,32,32,&length);
+    char* test = "bc";
 
-        FILE* fp = fopen("test.txt","w+");
-        data = (char*)realloc(data,(length+5)*sizeof(char));
+    for(int i = 0; i < 100;i++){
+        char* data = fuzzer(100,32,32);
+        // char data[15] = "2 + 2\nquit";
+        // printf("%ld \n",sizeof(data));
+        // printf("%ld strlen\n",strlen(data));
+        // fwrite(data,1,15,fp);
+        // fclose(fp);
+        // data = (char*)realloc(data,(strlen(data)+5)*sizeof(char));
+        // printf("%s\n",data);
+        // char quit[5] ={"quit\0"};
+        // strcat(data,"\nquit");
         
-        char quit[5] ={"quit\0"};
-        strcat(data,quit);
-        fputs(data,fp);
-        fclose(fp);
-        
-        char* test[] = {"bc","test.txt"};
-        subprocess_run(test,sizeof(test)/sizeof(char*),0,1,1);
+        subprocess_run(test,data,i,strlen(data));
     }
     // fuzzing_file();
 }
