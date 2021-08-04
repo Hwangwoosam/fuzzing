@@ -13,7 +13,6 @@
 char template[] = "tmp.XXXXXX";
 char *dir_name;
 
-
 typedef struct file_info{
     char* data;
     int length;
@@ -32,7 +31,7 @@ char * fuzzer(int max_length,int char_start,int char_range,int * length){
     return out;
 }
 
-file_info_t write_f(char* name){
+file_info_t write_f(char* name,char* data,int length){
     char* file;
     strcpy(file,dir_name);
     strcat(file,"/");
@@ -44,7 +43,9 @@ file_info_t write_f(char* name){
     }
 
     file_info_t temp;
-    temp.data = fuzzer(1000,'a',26,&temp.length);
+    temp.data = (char*)malloc(sizeof(char)*length);
+    strcpy(temp.data,data);
+    // temp.data = fuzzer(1000,'a',26,&temp.length);
     fwrite(temp.data,sizeof(char),temp.length,fp);
     fclose(fp);
     return temp;
@@ -90,6 +91,7 @@ void temp_file_close(){
 void subprocess_run(char* argv[],int argc,int stdin_flag, int stdout_flag, int stderr_flag){
     int std_out,std_err;
     dir_name = mkdtemp(template);
+    printf("flag\n");
     if(stdout_flag == 1){
         char temp[128];
         strcpy(temp,dir_name);
@@ -105,13 +107,14 @@ void subprocess_run(char* argv[],int argc,int stdin_flag, int stdout_flag, int s
         temp_file_make(temp2);
         std_err = open(temp2,O_RDWR|O_CREAT);
     }
+    printf("redirection\n");
     if(stderr_flag == 1){
             dup2(std_err,STDERR_FILENO); 
     }
     if(stdout_flag == 1){
             dup2(std_out,STDOUT_FILENO);
     }
-    printf("execl\n");
+    printf("execl help\n");
     int return_code;
     pid_t child = fork();
     if(child > 0){
@@ -135,8 +138,10 @@ int main(){
         // printf("%d :i\n",i);
         int length;
         char* data = fuzzer(100,32,32,&length);
+
         FILE* fp = fopen("test.txt","w+");
         data = (char*)realloc(data,(length+4)*sizeof(char));
+        
         char quit[4] ={"quit"};
         strcat(data,quit);
         fputs(data,fp);
