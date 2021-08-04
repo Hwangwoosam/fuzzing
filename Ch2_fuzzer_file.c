@@ -32,7 +32,9 @@ char * fuzzer(int max_length,int char_start,int char_range,int * length){
 }
 
 file_info_t write_f(char* name,char* data,int length){
-    char* file;
+    int dir_length = strlen(dir_name);
+    int name_length = strlen(name_length);
+    char* file = (char*)malloc(sizeof(char)*(dir_length+dir_name+1));
     strcpy(file,dir_name);
     strcat(file,"/");
     strcat(file,name);
@@ -45,6 +47,7 @@ file_info_t write_f(char* name,char* data,int length){
     file_info_t temp;
     temp.data = (char*)malloc(sizeof(char)*length);
     strcpy(temp.data,data);
+    // temp.data = fuzzer(1000,'a',26,&temp.length);
     fwrite(temp.data,sizeof(char),temp.length,fp);
     fclose(fp);
     return temp;
@@ -97,6 +100,7 @@ void subprocess_run(char* argv[],int argc,int stdin_flag, int stdout_flag, int s
         strcat(temp,"/std_out.txt");
         temp_file_make(temp);
         std_out = open(temp,O_RDWR|O_CREAT);
+        dup2(std_out,STDOUT_FILENO);
     }
 
     if(stderr_flag == 1){
@@ -105,27 +109,19 @@ void subprocess_run(char* argv[],int argc,int stdin_flag, int stdout_flag, int s
         strcat(temp2,"/std_err.txt");
         temp_file_make(temp2);
         std_err = open(temp2,O_RDWR|O_CREAT);
-    }
-    printf("redirection\n");
-    if(stderr_flag == 1){
-            dup2(std_err,STDERR_FILENO); 
-    }
-    if(stdout_flag == 1){
-            dup2(std_out,STDOUT_FILENO);
+        dup2(std_err,STDERR_FILENO); 
     }
     printf("execl help\n");
     int return_code;
     pid_t child = fork();
-    if(child > 0){
-        wait(&return_code);
-        // temp_file_close();
-    }else if(child == 0){
+    if(child == 0){
         char temp3[128] = "/bin/";
         strcat(temp3,argv[0]);
         execl(temp3,temp3,"-q",argv[1],(char*)0);
     }
     printf("end\n");
-    wait(0x0);
+    wait(&return_code);
+    temp_file_close();
 }
 
 
@@ -139,9 +135,9 @@ int main(){
         char* data = fuzzer(100,32,32,&length);
 
         FILE* fp = fopen("test.txt","w+");
-        data = (char*)realloc(data,(length+4)*sizeof(char));
+        data = (char*)realloc(data,(length+5)*sizeof(char));
         
-        char quit[4] ={"quit"};
+        char quit[4] ={"quit\0"};
         strcat(data,quit);
         fputs(data,fp);
         fclose(fp);
