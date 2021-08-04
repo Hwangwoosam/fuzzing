@@ -19,6 +19,19 @@ typedef struct file_info{
     int length;
 }file_info_t;
 
+char * fuzzer(int max_length,int char_start,int char_range,int * length){
+    int string_length = rand()%(max_length+1);
+    char* out = (char*)malloc(sizeof(char)*string_length);
+
+    for(int i = 0; i < string_length; i++){
+        char tmp = rand()%(char_range) + char_start;
+        out[i] = tmp;
+    }
+    *length = string_length;
+
+    return out;
+}
+
 file_info_t write_f(char* name){
     char* file;
     strcpy(file,dir_name);
@@ -82,8 +95,7 @@ void subprocess_run(char* argv[],int argc,int stdin_flag, int stdout_flag, int s
         strcpy(temp,dir_name);
         strcat(temp,"/std_out.txt");
         temp_file_make(temp);
-        // std_out = open(temp,O_RDWR|O_CREAT);
-        std_out = open(temp,O_CREAT|O_RDWR|O_TRUNC, S_IRWXU|S_IRWXG|S_IRWXO); 
+        std_out = open(temp,O_RDWR|O_CREAT);
     }
 
     if(stderr_flag == 1){
@@ -91,40 +103,47 @@ void subprocess_run(char* argv[],int argc,int stdin_flag, int stdout_flag, int s
         strcpy(temp2,dir_name);
         strcat(temp2,"/std_err.txt");
         temp_file_make(temp2);
-        // std_err = open(temp2,O_RDWR|O_CREAT);
-        std_err = open(temp2,O_CREAT|O_RDWR|O_TRUNC, S_IRWXU|S_IRWXG|S_IRWXO); 
+        std_err = open(temp2,O_RDWR|O_CREAT);
     }
-    // if(stderr_flag == 1){
-    //         dup2(std_err,STDERR_FILENO); 
-    // }
-    // if(stdout_flag == 1){
-    //         dup2(std_out,STDOUT_FILENO);
-    // }
+    if(stderr_flag == 1){
+            dup2(std_err,STDERR_FILENO); 
+    }
+    if(stdout_flag == 1){
+            dup2(std_out,STDOUT_FILENO);
+    }
+    printf("execl\n");
     int return_code;
     pid_t child = fork();
     if(child > 0){
-        printf("parent\n");
         wait(&return_code);
-        printf("%d return\n",return_code);
-        temp_file_close();
+        // temp_file_close();
     }else if(child == 0){
-        // printf("child\n");
-        // printf("%s %s\n",argv[0],argv[1]);
-        // execl(argv[0],argv[1],NULL);
-        
-        // fputs("quit",STDIN_FILENO);
-        char temp3[20] = "bc";
-        execl("/bin/cat","test.txt|bc",(char*)0);
+        char temp3[128] = "/bin/";
+        strcat(temp3,argv[0]);
+        execl(temp3,temp3,"-q",argv[1],(char*)0);
     }
-    exit(0);
+    printf("end\n");
+    wait(0x0);
 }
 
 
 
 int main(){
     //Test
-    
-    char* test[] = {"bc","test.txt"};
-    subprocess_run(test,sizeof(test)/sizeof(char*),0,1,1);
+    srand(time(NULL));
+    for(int i = 0; i < 100;i++){
+        // printf("%d :i\n",i);
+        int length;
+        char* data = fuzzer(100,32,32,&length);
+        FILE* fp = fopen("test.txt","w+");
+        data = (char*)realloc(data,(length+4)*sizeof(char));
+        char quit[4] ={"quit"};
+        strcat(data,quit);
+        fputs(data,fp);
+        fclose(fp);
+        
+        char* test[] = {"bc","test.txt"};
+        subprocess_run(test,sizeof(test)/sizeof(char*),0,1,1);
+    }
     // fuzzing_file();
 }
