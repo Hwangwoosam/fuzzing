@@ -45,7 +45,6 @@ file_info_t write_f(char* name,char* data,int length){
     file_info_t temp;
     temp.data = (char*)malloc(sizeof(char)*length);
     strcpy(temp.data,data);
-    // temp.data = fuzzer(1000,'a',26,&temp.length);
     fwrite(temp.data,sizeof(char),temp.length,fp);
     fclose(fp);
     return temp;
