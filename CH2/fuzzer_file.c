@@ -31,7 +31,6 @@ char * fuzzer(int max_length,int char_start,int char_range){
 
 void temp_file_make(char* file){
     FILE * fp = fopen(file,"w+");
-    // printf("%s\n",file);
     if(fp == NULL){
         printf("temp make failed\n");
     }
@@ -68,8 +67,6 @@ void subprocess_run(char* program,char* data,int num,int data_size){
     char err_temp[128];
     char number[64];
     sprintf(number,"%d",num);
-    // char input_name[20] = "input.txt";
-    // char output_name[20] ="output.txt";
     strcpy(input_temp,dir_name);
     strcat(input_temp,"/");
     strcat(input_temp,number);
@@ -85,15 +82,7 @@ void subprocess_run(char* program,char* data,int num,int data_size){
     FILE * tmp = fopen(input_temp,"w");
     fwrite(data,1,data_size,tmp);
     fclose(tmp);
-    // std_out = open(temp,O_RDWR|O_CREAT);
-    // dup2(std_out,STDOUT_FILENO);
 
-    // char temp2[128];
-    // strcpy(temp2,dir_name);
-    // strcat(temp2,"/std_err.txt");
-    // temp_file_make(temp2);
-    // std_err = open(temp2,O_RDWR|O_CREAT);
-    // dup2(std_err,STDERR_FILENO); 
      if (pipe(pipes) != 0) {
         perror("pipe") ;
         exit(1) ;
@@ -136,7 +125,6 @@ void subprocess_run(char* program,char* data,int num,int data_size){
         fclose(err);
     }
     wait(&return_code);
-    // temp_file_close();
 }
 
 int main(){
@@ -146,17 +134,6 @@ int main(){
 
     for(int i = 0; i < 100;i++){
         char* data = fuzzer(100,32,32);
-        // char data[15] = "2 + 2\nquit";
-        // printf("%ld \n",sizeof(data));
-        // printf("%ld strlen\n",strlen(data));
-        // fwrite(data,1,15,fp);
-        // fclose(fp);
-        // data = (char*)realloc(data,(strlen(data)+5)*sizeof(char));
-        // printf("%s\n",data);
-        // char quit[5] ={"quit\0"};
-        // strcat(data,"\nquit");
-        
         subprocess_run(test,data,i,strlen(data));
     }
-    // fuzzing_file();
 }
