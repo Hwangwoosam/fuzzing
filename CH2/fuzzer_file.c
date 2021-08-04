@@ -33,8 +33,8 @@ char * fuzzer(int max_length,int char_start,int char_range,int * length){
 
 file_info_t write_f(char* name,char* data,int length){
     int dir_length = strlen(dir_name);
-    int name_length = strlen(name_length);
-    char* file = (char*)malloc(sizeof(char)*(dir_length+dir_name+1));
+    int name_length = strlen(name);
+    char* file = (char*)malloc(sizeof(char)*(dir_length+name_length+1));
     strcpy(file,dir_name);
     strcat(file,"/");
     strcat(file,name);
@@ -94,12 +94,16 @@ void subprocess_run(char* argv[],int argc,int stdin_flag, int stdout_flag, int s
     int std_out,std_err;
     dir_name = mkdtemp(template);
     printf("flag\n");
+
     if(stdout_flag == 1){
         char temp[128];
         strcpy(temp,dir_name);
+        printf("%s \n",temp);
         strcat(temp,"/std_out.txt");
+        printf("%s \n",temp);
         temp_file_make(temp);
         std_out = open(temp,O_RDWR|O_CREAT);
+        printf("1\n");
         dup2(std_out,STDOUT_FILENO);
     }
 
@@ -109,8 +113,10 @@ void subprocess_run(char* argv[],int argc,int stdin_flag, int stdout_flag, int s
         strcat(temp2,"/std_err.txt");
         temp_file_make(temp2);
         std_err = open(temp2,O_RDWR|O_CREAT);
+        printf("2\n");
         dup2(std_err,STDERR_FILENO); 
     }
+
     printf("execl help\n");
     int return_code;
     pid_t child = fork();
@@ -120,6 +126,7 @@ void subprocess_run(char* argv[],int argc,int stdin_flag, int stdout_flag, int s
         execl(temp3,temp3,"-q",argv[1],(char*)0);
     }
     printf("end\n");
+    // dup2(STDOUT_FILENO,2);
     wait(&return_code);
     temp_file_close();
 }
@@ -137,7 +144,7 @@ int main(){
         FILE* fp = fopen("test.txt","w+");
         data = (char*)realloc(data,(length+5)*sizeof(char));
         
-        char quit[4] ={"quit\0"};
+        char quit[5] ={"quit\0"};
         strcat(data,quit);
         fputs(data,fp);
         fclose(fp);
