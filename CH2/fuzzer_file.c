@@ -26,6 +26,7 @@ char * fuzzer(int max_length,int char_start,int char_range){
         char tmp = rand()%(char_range) + char_start;
         out[i] = tmp;
     }
+    out[string_length-1] ='\0';
     return out;
 }
 
@@ -63,9 +64,10 @@ void subprocess_run(char* program,char* data,int num,int data_size){
         dir_name = mkdtemp(template);
     }
     char input_temp[128];
-    char out_temp[128];
-    char err_temp[128];
     char number[64];
+    
+    int error_count = 0;
+    int nerror_count = 0;
     sprintf(number,"%d",num);
     strcpy(input_temp,dir_name);
     strcat(input_temp,"/");
@@ -92,12 +94,14 @@ void subprocess_run(char* program,char* data,int num,int data_size){
         exit(1) ;
     }
     int return_code;
+
+    int Devnull = open("/dev/null",O_RDONLY);
     pid_t child = fork();
     if(child == 0){
         char temp3[128] = "/bin/";
         close(pipes[0]);
         close(pipes2[0]);
-        dup2(pipes[1],0);
+        dup2(Devnull,0);
         dup2(pipes[1],1);
         dup2(pipes2[1],2);
         strcat(temp3,program);
@@ -114,15 +118,22 @@ void subprocess_run(char* program,char* data,int num,int data_size){
             fwrite(buf,1,s,out);
         }
         fclose(out);
+
         FILE * err = fopen(err_temp,"w+");
         char buf2[1024];
         int s2;
+        int error_flag = 0;
         while((s2=read(pipes2[0],buf2,1023))>0){
             buf2[s2] = 0x0;
-            printf("%s",buf2);
             fwrite(buf2,1,s2,err);
+            error_flag++;
         }
         fclose(err);
+        if(error_flag > 0){
+            error_count++;
+        }else{
+            nerror_count++;
+        }
     }
     wait(&return_code);
 }
@@ -131,9 +142,10 @@ int main(){
     //Test
     srand(time(NULL));
     char* test = "bc";
-
     for(int i = 0; i < 100;i++){
-        char* data = fuzzer(100,32,32);
+        char* data = 0x0;
+        data = fuzzer(100,32,32);
         subprocess_run(test,data,i,strlen(data));
+        free(data);
     }
 }
