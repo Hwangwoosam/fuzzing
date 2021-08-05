@@ -48,9 +48,8 @@ void temp_file_close(){
     }
 }
 
-void subprocess_run(char* program,char* data,int num,int data_size){
+void subprocess_run(char* program,char* data,int num,int data_size,int* err_num,int* non_err_num){
     int std_out,std_err;
-    //input = dir_name[0], out = dir_name[1] , err = dir_name[2]
     if(dir_name == 0x0){
         dir_name = mkdtemp(template);
     }
@@ -81,11 +80,14 @@ void subprocess_run(char* program,char* data,int num,int data_size){
     int return_code;
     int Devnull = open("/dev/null",O_RDONLY);
 
+    int flag = 0;
+    int non_flag = 0;
     pid_t child = fork();
     if(child == 0){
-
+  
         close(pipes[0]);
         close(pipes2[0]);
+
         dup2(Devnull,0);
         dup2(pipes[1],1);
         dup2(pipes2[1],2);
@@ -93,19 +95,21 @@ void subprocess_run(char* program,char* data,int num,int data_size){
         execlp(program,program,"-q",input_temp,(char*)0);
 
     }else if(child > 0){
-        wait(&return_code);
+        
         close(pipes[1]);
         close(pipes2[1]);
+        wait(&return_code);
 
         char buf[1024];
         int s;
+
         FILE * out = fopen(out_temp,"w+");
         if(out == 0x0){
             perror("input file open failed\n");
         }
         while((s=read(pipes[0],buf,1023))>0){
-            buf[s] = 0x0;
             fwrite(buf,1,s,out);
+            non_flag++;
         }
         fclose(out);
 
@@ -114,23 +118,36 @@ void subprocess_run(char* program,char* data,int num,int data_size){
             perror("input file open failed\n");
         }
         while((s=read(pipes2[0],buf,1023))>0){
-            buf[s] = 0x0;
             fwrite(buf,1,s,err);
+            flag++;
         }
         fclose(err);
     }
-    printf("%d return code\n",return_code);
+    if(non_flag){
+        int num = *non_err_num;
+        num ++;
+        *non_err_num = num;
+    }
+    if(flag){
+        int num2 = *err_num;
+        num2 ++;
+        *err_num = num2;
+    }
+    // printf("%d return code\n",return_code);
 }
 
 int main(){
     //Test
     srand(time(NULL));
     char* test = "bc";
+    int err_num = 0;
+    int non_err_num =0;
     for(int i = 0; i < 100;i++){
         char* data = 0x0;
         data = fuzzer(100,32,32);
-        subprocess_run(test,data,i,strlen(data));
+        subprocess_run(test,data,i,strlen(data),&err_num,&non_err_num);
         free(data);
     }
+    printf("%d(err) : %d(non_err)\n",err_num,non_err_num);
     temp_file_close(dir_name);
 }
