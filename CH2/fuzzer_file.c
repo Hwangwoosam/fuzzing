@@ -63,8 +63,10 @@ void subprocess_run(char* program,char* data,int num,int data_size){
     strcpy(input_temp,dir_name);
     strcat(input_temp,"/");
     strcat(input_temp,number);
+
     strcpy(out_temp,input_temp);
     strcpy(err_temp,input_temp);
+    
     strcat(err_temp,"error.txt");
     strcat(out_temp,"output.txt");
     strcat(input_temp, "input.txt");
@@ -86,14 +88,14 @@ void subprocess_run(char* program,char* data,int num,int data_size){
     int Devnull = open("/dev/null",O_RDONLY);
     pid_t child = fork();
     if(child == 0){
-        char temp3[128] = "/bin/";
+        
         close(pipes[0]);
         close(pipes2[0]);
         dup2(Devnull,0);
         dup2(pipes[1],1);
         dup2(pipes2[1],2);
-        strcat(temp3,program);
-        execlp(temp3,temp3,"-q",input_temp,(char*)0);
+
+        execlp(program,program,"-q",input_temp,(char*)0);
 
     }else if(child > 0){
         close(pipes[1]);
