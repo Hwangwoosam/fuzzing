@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <string.h>
-#include <assert.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <dirent.h>
@@ -120,6 +118,7 @@ void subprocess_run(char* program,char* data,int num,int data_size){
         fclose(err);
     }
     wait(&return_code);
+    printf("%d return code\n",return_code);
 }
 
 int main(){
@@ -132,4 +131,5 @@ int main(){
         subprocess_run(test,data,i,strlen(data));
         free(data);
     }
+    temp_file_close(dir_name);
 }
