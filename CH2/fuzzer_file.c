@@ -59,17 +59,9 @@ void subprocess_run(char* program,char* data,int num,int data_size){
     char input_temp[128];
     char number[64];
     
-    sprintf(number,"%d",num);
-    strcpy(input_temp,dir_name);
-    strcat(input_temp,"/");
-    strcat(input_temp,number);
-
-    strcpy(out_temp,input_temp);
-    strcpy(err_temp,input_temp);
-    
-    strcat(err_temp,"error.txt");
-    strcat(out_temp,"output.txt");
-    strcat(input_temp, "input.txt");
+    sprintf(err_temp,"%s/%d_error.txt",dir_name,num);
+    sprintf(out_temp,"%s/%d_output.txt",dir_name,num);
+    sprintf(input_temp,"%s/%d_input.txt",dir_name,num);
 
     FILE * tmp = fopen(input_temp,"w+");
     fwrite(data,1,data_size,tmp);
@@ -83,8 +75,8 @@ void subprocess_run(char* program,char* data,int num,int data_size){
         perror("pipe2") ;
         exit(1) ;
     }
-    int return_code;
 
+    int return_code;
     int Devnull = open("/dev/null",O_RDONLY);
     pid_t child = fork();
     if(child == 0){
@@ -98,6 +90,7 @@ void subprocess_run(char* program,char* data,int num,int data_size){
         execlp(program,program,"-q",input_temp,(char*)0);
 
     }else if(child > 0){
+        wait(&return_code);
         close(pipes[1]);
         close(pipes2[1]);
 
@@ -117,7 +110,6 @@ void subprocess_run(char* program,char* data,int num,int data_size){
         }
         fclose(err);
     }
-    wait(&return_code);
     printf("%d return code\n",return_code);
 }
 
@@ -131,5 +123,5 @@ int main(){
         subprocess_run(test,data,i,strlen(data));
         free(data);
     }
-    temp_file_close(dir_name);
+    // temp_file_close(dir_name);
 }
