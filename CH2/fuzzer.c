@@ -10,7 +10,8 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 
-char * fuzzer(int max_length,int char_start,int char_range,int * length){
+char * fuzzer(int max_length,int char_start,int char_range){
+    
     int string_length = rand()%(max_length+1);
     char* out = (char*)malloc(sizeof(char)*string_length);
 
@@ -18,23 +19,24 @@ char * fuzzer(int max_length,int char_start,int char_range,int * length){
         char tmp = rand()%(char_range) + char_start;
         out[i] = tmp;
     }
-    *length = string_length;
-
+    out[string_length-1] ='\0';
     return out;
 }
 
 void fuzzer_test(){
-    int length = 0;
-    char * tmp = fuzzer(1000,'a',26,&length);
-    printf("%s %d\n",tmp,length);
+    char * tmp = fuzzer(100,32,32);
+    printf("%s\n",tmp);
 
-    tmp = fuzzer(1000,-500,500,&length);
-    printf("%s %d\n",tmp,length);
-    free(tmp); 
+    // tmp = fuzzer(1000,-500,500,&length);
+    // printf("%s %d\n",tmp,length);
+    // free(tmp); 
 }
 
 int main(){
     //Test
     srand(time(NULL));
-    fuzzer_test();
+    for(int i = 0; i < 100; i++){
+     fuzzer_test();    
+    }
+
 }
