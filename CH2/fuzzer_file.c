@@ -64,6 +64,9 @@ void subprocess_run(char* program,char* data,int num,int data_size){
     sprintf(input_temp,"%s/%d_input.txt",dir_name,num);
 
     FILE * tmp = fopen(input_temp,"w+");
+    if(tmp == 0x0){
+        perror("input file open failed\n");
+    }
     fwrite(data,1,data_size,tmp);
     fclose(tmp);
 
@@ -90,6 +93,7 @@ void subprocess_run(char* program,char* data,int num,int data_size){
         execlp(program,program,"-q",input_temp,(char*)0);
 
     }else if(child > 0){
+        
         wait(&return_code);
         close(pipes[1]);
         close(pipes2[1]);
@@ -97,6 +101,9 @@ void subprocess_run(char* program,char* data,int num,int data_size){
         char buf[1024];
         int s;
         FILE * out = fopen(out_temp,"w+");
+        if(out == 0x0){
+            perror("input file open failed\n");
+        }
         while((s=read(pipes[0],buf,1023))>0){
             buf[s] = 0x0;
             fwrite(buf,1,s,out);
@@ -104,6 +111,9 @@ void subprocess_run(char* program,char* data,int num,int data_size){
         fclose(out);
 
         FILE * err = fopen(err_temp,"w+");
+        if(err == 0x0){
+            perror("input file open failed\n");
+        }
         while((s=read(pipes2[0],buf,1023))>0){
             buf[s] = 0x0;
             fwrite(buf,1,s,err);
@@ -123,5 +133,5 @@ int main(){
         subprocess_run(test,data,i,strlen(data));
         free(data);
     }
-    // temp_file_close(dir_name);
+    temp_file_close(dir_name);
 }
