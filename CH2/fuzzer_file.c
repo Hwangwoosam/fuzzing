@@ -70,7 +70,7 @@ void subprocess_run(char* program,char* data,int num,int data_size){
     fwrite(data,1,data_size,tmp);
     fclose(tmp);
 
-     if (pipe(pipes) != 0) {
+    if (pipe(pipes) != 0) {
         perror("pipe") ;
         exit(1) ;
     }
@@ -81,6 +81,7 @@ void subprocess_run(char* program,char* data,int num,int data_size){
 
     int return_code;
     int Devnull = open("/dev/null",O_RDONLY);
+    
     pid_t child = fork();
     if(child == 0){
 
@@ -93,7 +94,6 @@ void subprocess_run(char* program,char* data,int num,int data_size){
         execlp(program,program,"-q",input_temp,(char*)0);
 
     }else if(child > 0){
-        
         wait(&return_code);
         close(pipes[1]);
         close(pipes2[1]);
