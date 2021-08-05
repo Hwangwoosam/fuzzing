@@ -57,7 +57,6 @@ void subprocess_run(char* program,char* data,int num,int data_size){
     char out_temp[128];
     char err_temp[128];
     char input_temp[128];
-    char number[64];
     
     sprintf(err_temp,"%s/%d_error.txt",dir_name,num);
     sprintf(out_temp,"%s/%d_output.txt",dir_name,num);
@@ -81,7 +80,7 @@ void subprocess_run(char* program,char* data,int num,int data_size){
 
     int return_code;
     int Devnull = open("/dev/null",O_RDONLY);
-    
+
     pid_t child = fork();
     if(child == 0){
 
