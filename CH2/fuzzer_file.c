@@ -30,14 +30,6 @@ char * fuzzer(int max_length,int char_start,int char_range){
     return out;
 }
 
-void temp_file_make(char* file){
-    FILE * fp = fopen(file,"w+");
-    if(fp == NULL){
-        printf("temp make failed\n");
-    }
-    fclose(fp);
-}
-
 void temp_file_close(){
     DIR * dp;
     struct dirent * ep;
@@ -63,6 +55,8 @@ void subprocess_run(char* program,char* data,int num,int data_size){
     if(dir_name == 0x0){
         dir_name = mkdtemp(template);
     }
+    char out_temp[128];
+    char err_temp[128];
     char input_temp[128];
     char number[64];
     
@@ -77,11 +71,8 @@ void subprocess_run(char* program,char* data,int num,int data_size){
     strcat(err_temp,"error.txt");
     strcat(out_temp,"output.txt");
     strcat(input_temp, "input.txt");
-    temp_file_make(err_temp);
-    temp_file_make(input_temp);
-    temp_file_make(out_temp);
 
-    FILE * tmp = fopen(input_temp,"w");
+    FILE * tmp = fopen(input_temp,"w+");
     fwrite(data,1,data_size,tmp);
     fclose(tmp);
 
@@ -122,18 +113,11 @@ void subprocess_run(char* program,char* data,int num,int data_size){
         FILE * err = fopen(err_temp,"w+");
         char buf2[1024];
         int s2;
-        int error_flag = 0;
         while((s2=read(pipes2[0],buf2,1023))>0){
             buf2[s2] = 0x0;
             fwrite(buf2,1,s2,err);
-            error_flag++;
         }
         fclose(err);
-        if(error_flag > 0){
-            error_count++;
-        }else{
-            nerror_count++;
-        }
     }
     wait(&return_code);
 }
