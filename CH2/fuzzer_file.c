@@ -88,7 +88,7 @@ void subprocess_run(char* program,char* data,int num,int data_size){
     int Devnull = open("/dev/null",O_RDONLY);
     pid_t child = fork();
     if(child == 0){
-        
+
         close(pipes[0]);
         close(pipes2[0]);
         dup2(Devnull,0);
@@ -100,6 +100,7 @@ void subprocess_run(char* program,char* data,int num,int data_size){
     }else if(child > 0){
         close(pipes[1]);
         close(pipes2[1]);
+
         char buf[1024];
         int s;
         FILE * out = fopen(out_temp,"w+");
@@ -110,11 +111,9 @@ void subprocess_run(char* program,char* data,int num,int data_size){
         fclose(out);
 
         FILE * err = fopen(err_temp,"w+");
-        char buf2[1024];
-        int s2;
-        while((s2=read(pipes2[0],buf2,1023))>0){
-            buf2[s2] = 0x0;
-            fwrite(buf2,1,s2,err);
+        while((s=read(pipes2[0],buf,1023))>0){
+            buf[s] = 0x0;
+            fwrite(buf,1,s,err);
         }
         fclose(err);
     }
