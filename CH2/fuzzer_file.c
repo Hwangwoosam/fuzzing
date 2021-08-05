@@ -58,8 +58,6 @@ void subprocess_run(char* program,char* data,int num,int data_size){
     char input_temp[128];
     char number[64];
     
-    int error_count = 0;
-    int nerror_count = 0;
     sprintf(number,"%d",num);
     strcpy(input_temp,dir_name);
     strcat(input_temp,"/");
