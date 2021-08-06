@@ -70,6 +70,7 @@ void subprocess_run(char* program,char* data,int num,int data_size,int* err_num,
 
     int flag = 0;
     int non_flag = 0;
+
     pid_t child = fork();
     if(child == 0){
   
@@ -84,9 +85,9 @@ void subprocess_run(char* program,char* data,int num,int data_size,int* err_num,
 
     }else if(child > 0){
         
+        wait(&return_code);
         close(pipes[1]);
         close(pipes2[1]);
-        wait(&return_code);
 
         char buf[1024];
         int s;

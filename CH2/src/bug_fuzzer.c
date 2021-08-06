@@ -14,11 +14,10 @@ void crash_if_too_long(char* s){
 
 int hang_if_no_space(char* s){
     int i = 0;
-    while(i < strlen(s)){
+    while(1){
         if(s[i] == ' '){
             return 1;
         }
-        i++;
     }
     return 0;
 }

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include "../include/fuzzer.h"
-#include "../include/check.h"
+#include "../include/bug_fuzzer.h"
 
 void test1(){
     for(int i = 0; i < 100; i++){
