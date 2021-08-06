@@ -6,20 +6,13 @@
 #include "../include/bug_fuzzer.h"
 
 void test1(){
-    for(int i = 0; i < 100; i++){
-        char * data = fuzzer(100,'0',10);
-        collapse_if_too_large(data);
-    }
-}
-
-void test2(){
    for(int i = 0; i < 100; i++){
         char * data = fuzzer(100,'0',10);
          crash_if_too_long(data);
     }
 }
 
-void test3(){
+void test2(){
     for(int i = 0; i < 100; i++){
         char * data = fuzzer(100,'0',10);
         if(hang_if_no_space(data)){
@@ -30,8 +23,15 @@ void test3(){
     }
 }
 
+void test3(){
+    for(int i = 0; i < 100; i++){
+        char * data = fuzzer(100,'0',10);
+        collapse_if_too_large(data);
+    }
+}
+
 int main(){
-    test1();
-    test2();
-    test3();
+    // test1();
+    // test2();
+    // test3();
 }
