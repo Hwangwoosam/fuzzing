@@ -4,7 +4,7 @@
 #include <time.h>
 #include "../include/fuzzer.h"
 
-
+//Buffer overflow
 void crash_if_too_long(char* s){
     char buffer[] = "Thursday";
     if(strlen(s) > strlen(buffer)){
@@ -12,6 +12,7 @@ void crash_if_too_long(char* s){
     }
 }
 
+//Missing Error Checks
 int hang_if_no_space(char* s){
     int i = 0;
     time_t start,end;
@@ -28,6 +29,7 @@ int hang_if_no_space(char* s){
     return 0;
 }
 
+// Rogue Numbers
 void collapse_if_too_large(char* s){
     int s_num =atoi(s);
     printf("%d\n",s_num);
