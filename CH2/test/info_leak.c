@@ -31,7 +31,7 @@ void test4(){
         char uninitialized_memory_marker[] = "deadbeef";
         printf("%s\n",s);
         assert(strstr(s,uninitialized_memory_marker) == NULL);
-        assert(strstr(s,"secret"));
+        assert(strstr(s,"secret") == NULL);
         free(s);
     }
 }
@@ -43,6 +43,6 @@ int main(){
     test2_bird();
     test3_hat();
     test4();
-    
+
     free(secret);
 }
