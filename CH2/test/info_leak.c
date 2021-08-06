@@ -38,9 +38,9 @@ void test4(){
 int main(){
     srand(time(NULL));
     secret = make_secret();
-    // test_potato();
-    // test2_bird();
+    test_potato();
+    test2_bird();
     test3_hat();
-    // test4();
+    test4();
     free(secret);
 }
