@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/wait.h>
+#include "../include/fuzzer.h"
 
 char template[] = "tmp.XXXXXX";
 char *dir_name;
@@ -15,19 +16,6 @@ char *dir_name;
 
 int pipes[2]; //stdin 0 read 1 write
 int pipes2[2];//stderr
-
-
-char * fuzzer(int max_length,int char_start,int char_range){
-    int string_length = rand()%(max_length+1);
-    char* out = (char*)malloc(sizeof(char)*string_length);
-
-    for(int i = 0; i < string_length; i++){
-        char tmp = rand()%(char_range) + char_start;
-        out[i] = tmp;
-    }
-    out[string_length-1] ='\0';
-    return out;
-}
 
 void temp_file_close(){
     DIR * dp;
@@ -107,8 +95,9 @@ void subprocess_run(char* program,char* data,int num,int data_size,int* err_num,
         if(out == 0x0){
             perror("input file open failed\n");
         }
-        while((s=read(pipes[0],buf,1023))>0){
+        while((s=read(pipes[0],buf,1024))>0){
             fwrite(buf,1,s,out);
+            // printf("%d: num\n",num);
             non_flag++;
         }
         fclose(out);
@@ -117,7 +106,7 @@ void subprocess_run(char* program,char* data,int num,int data_size,int* err_num,
         if(err == 0x0){
             perror("input file open failed\n");
         }
-        while((s=read(pipes2[0],buf,1023))>0){
+        while((s=read(pipes2[0],buf,1024))>0){
             fwrite(buf,1,s,err);
             flag++;
         }
@@ -143,8 +132,7 @@ int main(){
     int err_num = 0;
     int non_err_num =0;
     for(int i = 0; i < 100;i++){
-        char* data = 0x0;
-        data = fuzzer(100,32,32);
+        char* data = fuzzer(100,32,32);
         subprocess_run(test,data,i,strlen(data),&err_num,&non_err_num);
         free(data);
     }
