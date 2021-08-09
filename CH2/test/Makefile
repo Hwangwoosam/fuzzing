@@ -16,5 +16,8 @@ run: 4_runner_test.c ../src/4_runner.c ../include/4_runner.h
 program_runner: 5_program_runner.c ../src/5_program_runner.c ../include/5_program_runner.h
 	gcc -o p_runner 5_program_runner.c ../src/5_program_runner.c
 
+fuzzer_class: 6_fuzzer_class.c ../src/0_fuzzer.c ../src/6_fuzzer_class.c ../src/5_program_runner.c ../include/0_fuzzer.h ../include/5_program_runner.h ../include/6_fuzzer_class.h
+	gcc -o fuzzer_c 6_fuzzer_class.c ../src/0_fuzzer.c ../src/5_program_runner.c ../src/6_fuzzer_class.c
+
 clean:
-	rm -rf fuzzer check info runner p_runner
+	rm -rf fuzzer check info runner p_runner fuzzer_c
