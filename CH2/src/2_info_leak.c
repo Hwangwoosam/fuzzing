@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../include/fuzzer.h"
+#include "../include/0_fuzzer.h"
 
 char * heartbeat(char* reply,int length,char* memory){
     for(int i = 0; i < strlen(reply); i++){
