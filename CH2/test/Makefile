@@ -10,5 +10,11 @@ info : 2_info_leak.c ../src/0_fuzzer.c ../include/0_fuzzer.h ../src/2_info_leak.
 program_checker: 3_program_checker.c ../src/3_program_checker.c ../include/3_program_checker.h
 	gcc -o p_checker 3_program_checker.c ../src/3_program_checker.c
 
+run: 4_runner_test.c ../src/4_runner.c ../include/4_runner.h
+	gcc -o runner 4_runner_test.c ../src/4_runner.c
+
+program_runner: 5_program_runner.c ../src/5_program_runner.c ../include/5_program_runner.h
+	gcc -o p_runner 5_program_runner.c ../src/5_program_runner.c
+
 clean:
-	rm -rf fuzzer_f check info
+	rm -rf fuzzer check info runner p_runner
