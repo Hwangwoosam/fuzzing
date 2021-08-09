@@ -40,8 +40,8 @@ void add_item(item_list_t* i_list,char* key,char* value){
         i_list->list = (item_t**)realloc(i_list->list,sizeof(item_t*) * i_list->size);
     }
     i_list->list[i_list->size-1] = (item_t*)malloc(sizeof(item_t));
-    i_list->list[i_list->size-1]->key =(char*)malloc(sizeof(char)*(strlen(key)));
-    i_list->list[i_list->size-1]->value =(char*)malloc(sizeof(char)*(strlen(value)));
+    i_list->list[i_list->size-1]->key =(char*)malloc(sizeof(char)*(strlen(key)+1));
+    i_list->list[i_list->size-1]->value =(char*)malloc(sizeof(char)*(strlen(value)+1));
 
     strcpy(i_list->list[i_list->size-1]->key,key);
     strcpy(i_list->list[i_list->size-1]->value,value);
