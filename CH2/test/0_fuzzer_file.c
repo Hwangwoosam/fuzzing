@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/wait.h>
-#include "../include/fuzzer.h"
+#include "../include/0_fuzzer.h"
 
 char template[] = "tmp.XXXXXX";
 char *dir_name;
