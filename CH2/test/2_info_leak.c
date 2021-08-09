@@ -3,29 +3,17 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
-#include "../include/fuzzer.h"
-#include "../include/info.h"
+#include "../include/0_fuzzer.h"
+#include "../include/2_info.h"
 
 char * secret;
-void test_potato(){
-    char* result = heartbeat("potato",6,secret);
+void test(char* str){
+    char* result = heartbeat(str,strlen(str),secret);
     printf("result: %s\n",result);
     free(result);
 }
 
-void test2_bird(){
-    char* result2 = heartbeat("bird",4,secret);
-    printf("result2: %s\n",result2);
-    free(result2);
-}
-
-void test3_hat(){
-    char* result3 = heartbeat("hat",500,secret);
-    printf("result3: %s\n",result3);
-    free(result3);
-}
-
-void test4(){
+void test2(){
     for(int i = 0; i < 10; i++){
         char *s = heartbeat(fuzzer(100,32,32),(rand()%500)+1,secret);
         char uninitialized_memory_marker[] = "deadbeef";
@@ -39,10 +27,10 @@ int main(){
     srand(time(NULL));
     secret = make_secret();
 
-    test_potato();
-    test2_bird();
-    test3_hat();
-    test4();
+    test("potato");
+    test("bird");
+    test("hat");
+    test2();
 
     free(secret);
 }
