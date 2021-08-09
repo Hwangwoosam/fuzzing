@@ -41,7 +41,8 @@ result_t* subprocess(char* program,char* str){
         close(pipes2[1]);
         close(pipes3[1]);
 
-        dprintf(pipes[1],"%s",str);
+        // dprintf(pipes[1],"%s",str);
+        write(pipes[1],str,sizeof(str));
         close(pipes[1]);
 
         int status;
