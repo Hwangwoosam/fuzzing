@@ -43,24 +43,28 @@ result_t* subprocess(char* program,char* str){
 
         dprintf(pipes[1],"%s",str);
         close(pipes[1]);
+
         int status;
         wait(&status);
         temp->return_code = status;
+
         if(temp->return_code == 0){
-            temp->outcome = (char*)malloc(sizeof(char)*strlen(PASS));
+            temp->outcome = (char*)malloc(sizeof(char)*strlen(PASS)+1);
             strcpy(temp->outcome,PASS);
         }else if(temp->return_code < 0){
-            temp->outcome = (char*)malloc(sizeof(char)*strlen(FAIL));
+            temp->outcome = (char*)malloc(sizeof(char)*strlen(FAIL)+1);
             strcpy(temp->outcome,FAIL);
         }else{
-            temp->outcome = (char*)malloc(sizeof(char)*strlen(UNRESOLVED));
+            temp->outcome = (char*)malloc(sizeof(char)*strlen(UNRESOLVED)+1);
             strcpy(temp->outcome,UNRESOLVED);
         }
+
         temp->output = (char*)malloc(sizeof(char)*1024);
         if(read(pipes2[0],temp->output,1024) < 0){
             printf("read failed\n");
             exit(0);
         }
+
         temp->error = (char*)malloc(sizeof(char)*1024);
         if(read(pipes3[0],temp->error,1024) < 0){
             printf("read failed\n");
