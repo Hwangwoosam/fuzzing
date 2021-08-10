@@ -14,9 +14,9 @@ char template[] = "tmp.XXXXXX";
 char *dir_name;
 
 
-int pipes[2]; //stdin 0 read 1 write
+int pipes[2]; //stdout 0 read 1 write
 int pipes2[2];//stderr
-
+int pipes3[2];//stdint
 void temp_file_close(){
     DIR * dp;
     struct dirent * ep;
@@ -65,6 +65,11 @@ void subprocess_run(char* program,char* data,int num,int data_size,int* err_num,
         exit(1) ;
     }
 
+    if (pipe(pipes3) != 0) {
+        perror("pipe2") ;
+        exit(1) ;
+    }
+
     int return_code;
     int Devnull = open("/dev/null",O_RDONLY);
 
@@ -73,22 +78,23 @@ void subprocess_run(char* program,char* data,int num,int data_size,int* err_num,
 
     pid_t child = fork();
     if(child == 0){
-  
+        dup2(pipes3[0],0);
+        close(pipes3[0]);
+        close(pipes3[1]);
+        
         close(pipes[0]);
         close(pipes2[0]);
 
-        dup2(Devnull,0);
         dup2(pipes[1],1);
         dup2(pipes2[1],2);
 
-        execlp(program,program,"-q",input_temp,(char*)0);
+        execlp(program,program,"-q",input_temp,(char*)0x0);
 
     }else if(child > 0){
-        
-        wait(&return_code);
         close(pipes[1]);
         close(pipes2[1]);
-
+        close(pipes3[1]);
+        wait(&return_code);
         char buf[1024];
         int s;
 
@@ -98,9 +104,9 @@ void subprocess_run(char* program,char* data,int num,int data_size,int* err_num,
         }
         while((s=read(pipes[0],buf,1024))>0){
             fwrite(buf,1,s,out);
-            // printf("%d: num\n",num);
             non_flag++;
         }
+        close(pipes[0]);
         fclose(out);
 
         FILE * err = fopen(err_temp,"w+");
@@ -111,8 +117,11 @@ void subprocess_run(char* program,char* data,int num,int data_size,int* err_num,
             fwrite(buf,1,s,err);
             flag++;
         }
+        close(pipes2[0]);
         fclose(err);
     }
+    // wait(&return_code);
+    
     if(non_flag){
         int num = *non_err_num;
         num ++;
