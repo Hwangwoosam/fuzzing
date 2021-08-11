@@ -6,12 +6,19 @@
 void PrintRuner_init(Runner * print_runner){
     print_runner->input = 0x0;
     print_runner->outcome = 0x0;
+    print_runner->inp_size = 0;
     print_runner->free_inp = free_input;
     print_runner->run = PrintRunner_run;
 }
 
 int PrintRunner_run(Runner* print_runner,char* input, int inp_size){
+
     int ret = run(print_runner,input,inp_size);
+    if(ret == -1){
+        perror("run failed\n");
+        return ret;
+    }
+
     for(int i = 0; i < print_runner->inp_size; i++){
         printf("%d %c\n",i,print_runner->input[i]);
     }
