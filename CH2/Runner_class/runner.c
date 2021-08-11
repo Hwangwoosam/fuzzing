@@ -21,8 +21,8 @@ int run(Runner* self,char* input,int inp_size){
             return -1;
         }
 
-        char* mem_checker = memcpy(self->input,input,inp_size);
-        if(mem_checker == NULL){
+        self->input = memcpy(self->input,input,inp_size);
+        if(self->input == NULL){
             perror("Runner Class memcpy failed in run function\n");
             return -1;
         }
@@ -30,7 +30,7 @@ int run(Runner* self,char* input,int inp_size){
     }else if(inp_size ==0){
     
         self->input = 0x0;
-        
+
     }else{
         perror("Wrong input size\n");
         return -1;
