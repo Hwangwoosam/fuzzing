@@ -43,7 +43,7 @@ int PrintRunner_run(Runner* self,char* input, int inp_size){
     write(1,self->input,self->inp_size);
     
     // for(int i = 0; i < self->inp_size; i++){
-    //     printf("%d %c\n",i,self->input[i]);
+    //      putchar(self->input[i]);
     // }
     // printf("\n"); 
 
