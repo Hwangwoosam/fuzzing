@@ -11,20 +11,40 @@ void PrintRuner_init(Runner * print_runner){
     print_runner->run = PrintRunner_run;
 }
 
-int PrintRunner_run(Runner* print_runner,char* input, int inp_size){
+int PrintRunner_run(Runner* self,char* input, int inp_size){
 
-    int ret = run(print_runner,input,inp_size);
-    if(ret == -1){
-        perror("run failed\n");
-        return ret;
+    if(inp_size > 0){
+        self->input = (char*)malloc(sizeof(char)*inp_size);
+
+        if(self->input == NULL){
+            perror("malloc failed\n");
+            return -1;
+        }
+
+        self->input = memcpy(self->input,input,inp_size);
+        if(self->input == NULL){
+            perror("Runner Class memcpy failed in run function\n");
+            return -1;
+        }
+    
+    }else if(inp_size ==0){
+    
+        self->input = 0x0;
+
+    }else{
+        perror("Wrong input size\n");
+        return -1;
     }
 
-    for(int i = 0; i < print_runner->inp_size; i++){
-        printf("%d %c\n",i,print_runner->input[i]);
-    }
-    printf("\n");
+    self->inp_size = inp_size;
+    self->outcome = UNRESOLVED;
 
-    return ret;    
+     for(int i = 0; i < self->inp_size; i++){
+        printf("%d %c\n",i,self->input[i]);
+    }
+    printf("\n"); 
+
+    return 0;
 }
 
 int main(){
