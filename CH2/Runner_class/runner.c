@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "runner.h"
 
 void Runner_init(Runner* runner){
