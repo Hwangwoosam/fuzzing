@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "print_runner.h"
 
 void PrintRuner_init(Runner * print_runner){
@@ -39,10 +40,12 @@ int PrintRunner_run(Runner* self,char* input, int inp_size){
     self->inp_size = inp_size;
     self->outcome = UNRESOLVED;
 
-     for(int i = 0; i < self->inp_size; i++){
-        printf("%d %c\n",i,self->input[i]);
-    }
-    printf("\n"); 
+    write(1,self->input,self->inp_size);
+    
+    // for(int i = 0; i < self->inp_size; i++){
+    //     printf("%d %c\n",i,self->input[i]);
+    // }
+    // printf("\n"); 
 
     return 0;
 }
