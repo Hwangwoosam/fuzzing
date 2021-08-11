@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "print_runner.h"
 
 void PrintRuner_init(Runner * print_runner){
