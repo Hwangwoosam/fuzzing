@@ -66,7 +66,7 @@ int run(run_arg_t run_config ,char* random_inp,int inp_size,int order){
     int pipe_stdin[2];
     int pipe_stdout[2];
     int pipe_stderr[2];
-
+    
     if(pipe(pipe_stdin) != 0) {
         perror("stdin pipe error\n") ;
         exit(1) ;
@@ -159,6 +159,30 @@ void fuzzer_init(test_config_t* config){
     input_config.f_max_len = config->inp_arg.f_max_len;
     input_config.f_char_start = config->inp_arg.f_char_start;
     input_config.f_char_range = config->inp_arg.f_char_range;
+    if(input_config.f_min_len < 0){
+        perror("Wrong min length\n");
+        exit(1);
+    }
+
+    if(input_config.f_max_len < 0){
+        perror("Wrong max length\n");
+        exit(1);
+    }
+
+    if(input_config.f_min_len > input_config.f_max_len){
+        perror("min length is bigger than max length\n");
+        exit(1);
+    }
+
+    if(input_config.f_char_start + input_config.f_char_range > 127 ){
+        perror("out of character range\n");
+        exit(1);
+    }
+
+    if(input_config.f_char_start < 0 || input_config.f_char_range < 0){
+        perror("char_start or char_range is not negative\n");
+        exit(1);
+    }
 
     if(strlen(run_config.binary_path) > PATH_MAX){
         perror("path length is too long\n");
@@ -193,7 +217,7 @@ void fuzzer_init(test_config_t* config){
     create_dir();
 }
 
-void prine_result(char* dir_name,int trial){
+void print_result(char* dir_name,int trial,int return_code){
 
 }
 
@@ -206,11 +230,13 @@ void fuzzer_main(test_config_t* config){
 
     signal(SIGALRM,timeout_handler);
     
-    t.it_value.tv_sec = run_config.timeout;
-    t.it_interval = t.it_value;
+    // t.it_value.tv_sec = run_config.timeout;
+    // t.it_interval = t.it_value;
+
+    // setitimer(ITIMER_REAL,&t,0x0);
 
     for(int i = 0; i < trial ;i++){
-        setitimer(ITIMER_REAL,&t,0x0);
+        alarm(run_config.timeout);
         //#2 fuzzer_create_input();
         char* random_inp = (char*)malloc(sizeof(char)*(input_config.f_max_len+1));
     
@@ -222,6 +248,7 @@ void fuzzer_main(test_config_t* config){
         //#4 fuzzer_oracle;
         config->oracle(dir_name,i,return_code);
 
+        print_result(dir_name,i,return_code);
         free(random_inp);
     }
 }
