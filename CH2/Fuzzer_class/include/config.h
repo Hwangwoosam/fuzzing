@@ -22,7 +22,7 @@ typedef struct test_config{
     run_arg_t run_arg;
 
     int trial;
-    int (* oracle)(char* dir_name,int trial);
+    int (* oracle)(char* dir_name,int trial,int ret_code);
     
 }test_config_t;
 
