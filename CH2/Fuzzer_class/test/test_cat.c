@@ -10,7 +10,7 @@ int oracle(char* dir_name,int trial,int return_code){
     char out_fpath[64];
     sprintf(inp_fpath,"%s/%d_input",dir_name,trial);
     sprintf(out_fpath,"%s/%d_output",dir_name,trial);
-    
+
     if(return_code == 0){
         int inp_fd = open(inp_fpath,O_RDONLY);
         int out_fd = open(out_fpath,O_RDONLY);
@@ -28,12 +28,15 @@ int oracle(char* dir_name,int trial,int return_code){
             char inp_buf[1024];
             char out_buf[1024];
             int inp_s,out_s;
+
             inp_s = read(inp_fd,inp_buf,1023);
             inp_buf[inp_s] = '\0';
+
             out_s = read(out_fd,out_buf,1023);
             out_buf[out_s] = '\0';
+
             assert(inp_s == out_s);
-            assert(strcmp(inp_buf,out_buf) == 0);
+            assert(memcmp(inp_buf,out_buf,1024) == 0);
             if(inp_s == 0 && out_s == 0){
                 break;
             }
