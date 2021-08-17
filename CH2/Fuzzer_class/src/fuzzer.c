@@ -5,6 +5,8 @@
 #include <assert.h>
 #include <signal.h>
 #include <sys/time.h>
+#include <dirent.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
 
@@ -18,6 +20,9 @@ static pid_t child;
 static int (* oracle) (char * dir_name,int trial,int ret_code) ;
 
 static char dir_name[20];
+static int failed;
+static int passed;
+static int unresol;
 
 void create_dir(){
     char template[] = "tmp.XXXXXX" ;
@@ -66,7 +71,27 @@ int run(run_arg_t run_config ,char* random_inp,int inp_size,int order){
     int pipe_stdin[2];
     int pipe_stdout[2];
     int pipe_stderr[2];
-    
+
+    char inp_fpath[64];
+    sprintf(inp_fpath,"%s/%d_input",dir_name,order);
+    int fd = open(inp_fpath,O_RDWR | O_TRUNC | O_CREAT , 0600);
+    if(fd < 0){
+        perror("input fd open failed\n");
+        exit(1);
+    }
+    int sent = 0;
+    while(sent < inp_size){
+        sent += write(fd,random_inp+sent,inp_size-sent);
+        if(sent == -1){
+            perror("input write error\n");
+            exit(1);
+        }
+    }
+    if(close(fd) == -1 ){
+        perror("input fd close failed\n");
+        exit(1);
+    }
+
     if(pipe(pipe_stdin) != 0) {
         perror("stdin pipe error\n") ;
         exit(1) ;
@@ -90,6 +115,7 @@ int run(run_arg_t run_config ,char* random_inp,int inp_size,int order){
         close(pipe_stdout[1]);
         close(pipe_stderr[1]);
         close(pipe_stdin[1]);
+        close(pipe_stdin[0]);
 
         wait(&status);
 
@@ -97,35 +123,16 @@ int run(run_arg_t run_config ,char* random_inp,int inp_size,int order){
         int s;
 
         char out_fpath[64];
-        char inp_fpath[64];
         char err_fpath[64];
 
-        sprintf(inp_fpath,"%s/%d_input",dir_name,order);
         sprintf(out_fpath,"%s/%d_output",dir_name,order);
         sprintf(err_fpath,"%s/%d_error",dir_name,order);
 
-        int fd = open(inp_fpath,O_RDWR | O_TRUNC | O_CREAT , 0600);
-        if(fd < 0){
-            perror("input fd open failed\n");
-            exit(1);
-        }
-        int sent = 0;
-        while(sent < inp_size){
-            sent += write(fd,random_inp+sent,inp_size-sent);
-            if(sent == -1){
-                perror("input write error\n");
-                exit(1);
-            }
-        }
-        if(close(fd) == -1 ){
-            perror("input fd close failed\n");
-            exit(1);
-        }
-
-        save_data(out_fpath,pipe_stdout[0]);
-        
+        save_data(out_fpath,pipe_stdout[0]);        
         save_data(err_fpath,pipe_stderr[0]);
-    
+
+        close(pipe_stderr[0]);
+        close(pipe_stdout[0]);
 
     }else if(child == 0){
         dup2(pipe_stdin[0],STDIN_FILENO);
@@ -174,7 +181,7 @@ void fuzzer_init(test_config_t* config){
         exit(1);
     }
 
-    if(input_config.f_char_start + input_config.f_char_range > 127 ){
+    if(input_config.f_char_start + input_config.f_char_range > 255 ){
         perror("out of character range\n");
         exit(1);
     }
@@ -217,8 +224,76 @@ void fuzzer_init(test_config_t* config){
     create_dir();
 }
 
-void print_result(char* dir_name,int trial,int return_code){
+void print_result(char* dir_name,int num,int return_code){
+    char out_path[64];
+    char err_path[64];
+    sprintf(err_path,"%s/%d_error",dir_name,num);
+    sprintf(out_path,"%s/%d_output",dir_name,num);
 
+    int out_fd = open(out_path,O_RDONLY,0600);
+    int err_fd = open(err_path,O_RDONLY,0600);
+
+    if(out_fd < 0){
+            perror("print result output fd open failed\n");
+            exit(1);
+    }
+
+    if(err_fd < 0){
+            perror("print result error fd open failed\n");
+            exit(1);
+    }
+
+    int out_s,err_s;
+    char out_buf[1024]={0,};
+    char err_buf[1024]={0,};
+    if((out_s = read(out_fd,out_buf,1023)) < 0){
+        perror("read error\n");
+    }
+    if((err_s = read(err_fd,err_buf,1023)) < 0){
+        perror("read error\n");
+    }
+    
+    if(close(out_fd) == -1 ){
+        perror("print result output fd close failed\n");
+        exit(1);
+    }
+
+    if(close(err_fd) == -1 ){
+        perror("print result error fd close failed\n");
+        exit(1);
+    }
+    out_buf[out_s] ='\0';
+    err_buf[err_s] ='\0';
+
+    if(return_code == 0){
+        passed++;
+        // printf("output: %s\nerror: %s\nreturn code: \"PASS\"\n\n",out_buf,err_buf);
+    }else if(return_code > 0){
+        failed++;
+        printf("output: %s\nerror: %s\nreturn code: \"Failed\"\n\n",out_buf,err_buf);
+    }else{
+        unresol++;
+        printf("output: %s\nerror: %s\nreturn code: \"UNRESOLVED\"\n\n",out_buf,err_buf);
+    }
+}
+
+void delete_result(){
+    DIR * dp;
+    struct dirent * ep;
+    dp = opendir(dir_name);
+    while(ep = readdir(dp)){
+        char temp[256];
+        strcpy(temp,dir_name);
+        strcat(temp,"/");
+        if(ep->d_type == DT_REG){
+            strcat(temp,ep->d_name);
+            remove(temp);
+        }
+    }
+    if(rmdir(dir_name) == -1){
+        perror("rmdir failed: ");
+        exit(0);
+    }
 }
 
 void fuzzer_main(test_config_t* config){
@@ -229,26 +304,22 @@ void fuzzer_main(test_config_t* config){
     struct itimerval t;
 
     signal(SIGALRM,timeout_handler);
-    
-    // t.it_value.tv_sec = run_config.timeout;
-    // t.it_interval = t.it_value;
-
-    // setitimer(ITIMER_REAL,&t,0x0);
 
     for(int i = 0; i < trial ;i++){
         alarm(run_config.timeout);
         //#2 fuzzer_create_input();
         char* random_inp = (char*)malloc(sizeof(char)*(input_config.f_max_len+1));
-    
+
         int random_size;
         create_inp(random_inp,&random_size,input_config);
-
         //#3 fuzzer_run();
         int return_code = run(run_config,random_inp,random_size,i);
         //#4 fuzzer_oracle;
         config->oracle(dir_name,i,return_code);
-
         print_result(dir_name,i,return_code);
         free(random_inp);
     }
+    
+    printf("result summary:\nfiles number: %d\nPassed: %d\nFailed: %d\n",trial,passed,failed);
+    delete_result();
 }
