@@ -267,7 +267,7 @@ void print_result(char* dir_name,int num,int return_code){
 
     if(return_code == 0){
         passed++;
-        // printf("output: %s\nerror: %s\nreturn code: \"PASS\"\n\n",out_buf,err_buf);
+        printf("output: %s\nerror: %s\nreturn code: \"PASS\"\n\n",out_buf,err_buf);
     }else if(return_code > 0){
         failed++;
         printf("output: %s\nerror: %s\nreturn code: \"Failed\"\n\n",out_buf,err_buf);
@@ -319,7 +319,7 @@ void fuzzer_main(test_config_t* config){
         print_result(dir_name,i,return_code);
         free(random_inp);
     }
-    
+
     printf("result summary:\nfiles number: %d\nPassed: %d\nFailed: %d\n",trial,passed,failed);
     delete_result();
 }
