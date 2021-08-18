@@ -1,0 +1,1 @@
+char hex_to_dec(char*);
