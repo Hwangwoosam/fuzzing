@@ -173,7 +173,7 @@ void fuzzer_init(test_config_t* config){
         }else{
             run_config.src_path = (char*)malloc(sizeof(char)*(strlen(config->run_arg.src_path) + 1));
             strcpy(run_config.src_path,config->run_arg.src_path);
-            int src_exist = access(run_config.src_path,R_OK);
+            int src_exist = access(run_config.src_path,F_OK);
             assert(src_exist == 0 && "this file doesn't exist or can't read\n");
             src_flag = 1;
             char* src_filename = get_filename(run_config.src_path);
@@ -191,6 +191,9 @@ void fuzzer_init(test_config_t* config){
             int binary_exist = access(run_config.binary_path,X_OK);
             assert(binary_exist == 0 && "this file doesn't exist or can't excute\n");
         }
+    }else{
+        perror("there is no path\n");
+        exit(1);
     }
 
     input_config.f_min_len = config->inp_arg.f_min_len;
@@ -346,7 +349,7 @@ void fuzzer_main(test_config_t* config){
         //#4 fuzzer_oracle;
         config->oracle(dir_name,i,return_code);
     
-        if(src_flag == 1 && return_code == 0){
+        if(src_flag == 1){
             coverage_gcov(cover_set->src_file_name);
             read_gcov(run_config.src_path,&cover_set->execute_check[i],cover_set->line_check);
             reset_gcda(run_config.binary_path);
@@ -382,6 +385,6 @@ void fuzzer_main(test_config_t* config){
         free(run_config.src_path);
         coverage_free(cover_set);
     }
-    
+
     delete_result();
 }
