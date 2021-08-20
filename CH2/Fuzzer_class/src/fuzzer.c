@@ -12,6 +12,7 @@
 
 #include "../include/create_inp.h"
 #include "../include/fuzzer.h"
+#include "../../coverage/include/coverage.h"
 
 static input_arg_t input_config;
 static run_arg_t run_config;
@@ -20,9 +21,10 @@ static pid_t child;
 static int (* oracle) (char * dir_name,int trial,int ret_code) ;
 
 static char dir_name[20];
-static int failed;
+static int failed,backslash,no_8,no_d;
 static int passed;
 static int unresol;
+static int src_flag;
 
 void create_dir(){
     char template[] = "tmp.XXXXXX" ;
@@ -106,7 +108,6 @@ int run(run_arg_t run_config ,char* random_inp,int inp_size,int order){
     }
 
     int status;
-
     child = fork();
     if(child > 0){
         
@@ -135,6 +136,7 @@ int run(run_arg_t run_config ,char* random_inp,int inp_size,int order){
         close(pipe_stdout[0]);
 
     }else if(child == 0){
+        alarm(run_config.timeout);
         dup2(pipe_stdin[0],STDIN_FILENO);
         dup2(pipe_stdout[1],STDOUT_FILENO);
         dup2(pipe_stderr[1],STDERR_FILENO);
@@ -143,7 +145,14 @@ int run(run_arg_t run_config ,char* random_inp,int inp_size,int order){
         close(pipe_stdin[1]);
         close(pipe_stdout[0]);
         close(pipe_stderr[0]);
-        
+
+        if(run_config.fuzz_type == 1){
+            run_config.cmd_args = (char**)malloc(sizeof(char*)*3);
+            run_config.cmd_args[0] = run_config.binary_path;
+            run_config.cmd_args[1] = random_inp;
+            run_config.cmd_args[2] = NULL;
+        }
+
         execv(run_config.binary_path,run_config.cmd_args);
         perror("execv error\n");
         exit(1);
@@ -157,15 +166,61 @@ int run(run_arg_t run_config ,char* random_inp,int inp_size,int order){
 
 void fuzzer_init(test_config_t* config){
 
-    // //#1 path and args check
-    int fp_exist = access(config->run_arg.binary_path,X_OK);
-    assert(fp_exist == 0 && "this file doesn't exist or can't excute\n");
-    
-    //#2 invalid input
+    if(config->run_arg.src_path != NULL){
+        if(strlen(config->run_arg.src_path) > PATH_MAX){
+            perror("src path length is too long\n");
+            exit(1);
+        }else{
+            run_config.src_path = (char*)malloc(sizeof(char)*(strlen(config->run_arg.src_path) + 1));
+            strcpy(run_config.src_path,config->run_arg.src_path);
+            int src_exist = access(run_config.src_path,R_OK);
+            assert(src_exist == 0 && "this file doesn't exist or can't read\n");
+            src_flag = 1;
+            char* src_filename = get_filename(run_config.src_path);
+            int file_length = strlen(src_filename);
+            run_config.binary_path = (char*)malloc(sizeof(char)*file_length);
+            memcpy(run_config.binary_path,src_filename,file_length-2);
+        }
+    }else if(config->run_arg.binary_path != NULL){
+        if(strlen(config->run_arg.binary_path) > PATH_MAX){
+            perror("binary path length is too long\n");
+            exit(1);
+        }else{
+            run_config.binary_path = (char*)malloc(sizeof(char*)*(strlen(config->run_arg.binary_path)+1));
+            strcpy(run_config.binary_path,config->run_arg.binary_path);
+            int binary_exist = access(run_config.binary_path,X_OK);
+            assert(binary_exist == 0 && "this file doesn't exist or can't excute\n");
+        }
+    }
+
     input_config.f_min_len = config->inp_arg.f_min_len;
     input_config.f_max_len = config->inp_arg.f_max_len;
     input_config.f_char_start = config->inp_arg.f_char_start;
     input_config.f_char_range = config->inp_arg.f_char_range;
+    
+    run_config.args_num = config->run_arg.args_num;
+    run_config.cmd_args = (char**)malloc(sizeof(char*)*(run_config.args_num + 2));
+    run_config.cmd_args[0] = (char*)malloc(sizeof(char)*(strlen(run_config.binary_path)+1));
+    strcpy(run_config.cmd_args[0],run_config.binary_path);
+    run_config.cmd_args[1] = NULL;
+    run_config.fuzz_type = config->run_arg.fuzz_type;
+   
+    if(run_config.args_num > 0){
+        for(int i = 1 ; i < run_config.args_num + 1; i++){
+            run_config.cmd_args[i] = (char*)malloc(sizeof(char)*(strlen(config->run_arg.cmd_args[i-1] + 1)));
+            strcpy(run_config.cmd_args[i],config->run_arg.cmd_args[i-1]);
+        }
+        run_config.cmd_args[run_config.args_num+1] = "NULL";
+
+    }else if(run_config.args_num < 0){
+        perror("Wrong arg size\n");
+        exit(1);
+    }
+
+    run_config.timeout = config->run_arg.timeout;
+    trial = config->trial;
+    oracle = config->oracle;
+    
     if(input_config.f_min_len < 0){
         perror("Wrong min length\n");
         exit(1);
@@ -190,35 +245,6 @@ void fuzzer_init(test_config_t* config){
         perror("char_start or char_range is not negative\n");
         exit(1);
     }
-
-    if(strlen(run_config.binary_path) > PATH_MAX){
-        perror("path length is too long\n");
-        exit(1);
-    }else{
-        strcpy(run_config.binary_path,config->run_arg.binary_path);
-    }
-
-    run_config.args_num = config->run_arg.args_num;
-    run_config.cmd_args = (char**)malloc(sizeof(char*)*run_config.args_num + 2);
-    run_config.cmd_args[0] = (char*)malloc(sizeof(char)*(strlen(run_config.binary_path)+1));
-    strcpy(run_config.cmd_args[0],run_config.binary_path);
-    run_config.cmd_args[1] = NULL;
-
-    if(run_config.args_num > 0){
-        for(int i = 1 ; i < run_config.args_num + 1; i++){
-            run_config.cmd_args[i] = (char*)malloc(sizeof(char)*(strlen(config->run_arg.cmd_args[i-1] + 1)));
-            strcpy(run_config.cmd_args[i],config->run_arg.cmd_args[i-1]);
-        }
-        run_config.cmd_args[run_config.args_num] = "NULL";
-
-    }else if(run_config.args_num < 0){
-        perror("Wrong arg size\n");
-        exit(1);
-    }
-    run_config.timeout = config->run_arg.timeout;
-
-    trial = config->trial;
-    oracle = config->oracle;
 
     //#3 make dir to store output
     create_dir();
@@ -267,13 +293,13 @@ void print_result(char* dir_name,int num,int return_code){
 
     if(return_code == 0){
         passed++;
-        printf("output: %s\nerror: %s\nreturn code: \"PASS\"\n\n",out_buf,err_buf);
+        // printf("output: %s\nerror: %s\nreturn code: \"PASS\"\n\n",out_buf,err_buf);
     }else if(return_code > 0){
         failed++;
-        printf("output: %s\nerror: %s\nreturn code: \"Failed\"\n\n",out_buf,err_buf);
+        // printf("output: %s\nerror: %s\nreturn code: \"Failed\"\n\n",out_buf,err_buf);
     }else{
         unresol++;
-        printf("output: %s\nerror: %s\nreturn code: \"UNRESOLVED\"\n\n",out_buf,err_buf);
+        // printf("output: %s\nerror: %s\nreturn code: \"UNRESOLVED\"\n\n",out_buf,err_buf);
     }
 }
 
@@ -298,28 +324,64 @@ void delete_result(){
 
 void fuzzer_main(test_config_t* config){
     srand(time(NULL));
-
     fuzzer_init(config);
 
+    coverage_set_t* cover_set = (coverage_set_t*)malloc(sizeof(coverage_set_t));
+
+    if(src_flag == 1){
+        coverage_init(run_config,cover_set,trial);
+    }
+    
     struct itimerval t;
-
+    time_t start,end;
     signal(SIGALRM,timeout_handler);
-
+    start = clock();
     for(int i = 0; i < trial ;i++){
-        alarm(run_config.timeout);
         //#2 fuzzer_create_input();
         char* random_inp = (char*)malloc(sizeof(char)*(input_config.f_max_len+1));
-
         int random_size;
         create_inp(random_inp,&random_size,input_config);
         //#3 fuzzer_run();
         int return_code = run(run_config,random_inp,random_size,i);
         //#4 fuzzer_oracle;
         config->oracle(dir_name,i,return_code);
+    
+        if(src_flag == 1 && return_code == 0){
+            coverage_gcov(cover_set->src_file_name);
+            read_gcov(run_config.src_path,&cover_set->execute_check[i],cover_set->line_check);
+            reset_gcda(run_config.binary_path);
+        }
         print_result(dir_name,i,return_code);
         free(random_inp);
     }
 
-    printf("result summary:\nfiles number: %d\nPassed: %d\nFailed: %d\n",trial,passed,failed);
+    end = clock();
+    double excution = (float)(end-start)/CLOCKS_PER_SEC;
+    printf("===================result summary=================\n");
+    printf("excution time: %f\n",excution);
+    printf("running program per sec: %f\n",trial/excution);
+    printf("failed percentage: %0.5f%%\n",failed/(float)trial);
+    printf("trial: %d\nPassed: %d\nFailed: %d\n",trial,passed,failed);
+    printf("\n");
+    printf("===================coverage=======================\n");
+    for(int i = 0; i < trial; i++){
+        printf("Trial[%d]: %0.3f%%\n",i,((float)cover_set->execute_check[i]/(float)cover_set->code_size[0])*100);
+    }
+    printf("==================================================\n");
+    int accumulate = 0;
+    for(int i = 0; i <cover_set->code_size[1]; i++){
+        if(cover_set->line_check[i] != 0){
+            accumulate++;
+        }
+    }
+    printf("total coverage : %0.3f%%\n",((float)accumulate/(float)cover_set->code_size[0])*100);
+    free(run_config.binary_path);
+    free(run_config.cmd_args);
+
+    if(src_flag == 1){
+        free(run_config.src_path);
+        coverage_free(cover_set);
+    }
+    
     delete_result();
 }
