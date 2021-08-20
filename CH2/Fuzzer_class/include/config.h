@@ -10,10 +10,12 @@ typedef struct input_arg{
 }input_arg_t;
 
 typedef struct run_arg{
-    char binary_path[PATH_MAX];
+    char* binary_path;
+    char* src_path;
     char** cmd_args;
     int args_num;
     int timeout;
+    int fuzz_type; // 0 = stdin , 1 = argument 
 }run_arg_t;
 
 typedef struct test_config{
