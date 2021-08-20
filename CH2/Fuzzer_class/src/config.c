@@ -19,11 +19,7 @@ void init_config(test_config_t * config){
     config->run_arg.timeout = 2;
     config->run_arg.cmd_args = NULL;
     config->run_arg.args_num = 0;
-
-    char* mem_check;
-    mem_check = memset(config->run_arg.binary_path,0,PATH_MAX);
-    if(mem_check == NULL){
-        perror("binary path initialize failed\n");
-        exit(0);
-    }
+    config->run_arg.src_path = NULL;
+    config->run_arg.binary_path = NULL;
+    config->run_arg.fuzz_type = 0;
 }
