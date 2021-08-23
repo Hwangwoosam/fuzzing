@@ -10,9 +10,13 @@ void coverage_init(run_arg_t run_config,coverage_set_t* cover_set,int trial){
     cover_set->code_size = get_code_line(gcove_file);
 
     cover_set->line_check = (int*)malloc(sizeof(int)*cover_set->code_size[1]);
+    cover_set->branch_check = (int*)malloc(sizeof(int)*cover_set->code_size[2]);
     cover_set->execute_check = (int*)malloc(sizeof(int)*trial);
+    cover_set->e_branch_check = (int*)malloc(sizeof(int)*trial);
     memset(cover_set->execute_check,0,sizeof(char)*trial);
+    memset(cover_set->e_branch_check,0,sizeof(char)*trial);
     memset(cover_set->line_check,0,sizeof(char)*cover_set->code_size[1]);
+    memset(cover_set->branch_check,0,sizeof(char)*cover_set->code_size[2]);
 }
 
 int coverage_compile(char *test_file,char* exc_file){
@@ -60,7 +64,7 @@ int coverage_gcov(char* test_file){
     int pid = fork();
     int status;
     if(pid == 0){
-        char* args[] = {"/usr/bin/gcov",test_file,NULL}; 
+        char* args[] = {"/usr/bin/gcov","-b","-c",test_file,NULL}; 
         execv("/usr/bin/gcov",args);
 
         perror("gcov execv error\n");
@@ -88,7 +92,7 @@ char* get_filename(char* path){
     return cpy_file_name;
 }
 
-void read_gcov(char* path,int* result,int* list){
+void read_gcov(char* path,int* line_result,int* branch_result,int* list,int* total_branch){
     char* src_file = get_filename(path);
     FILE* fp;
     char* line = (char*)malloc(sizeof(char)*256) ;
@@ -101,21 +105,35 @@ void read_gcov(char* path,int* result,int* list){
         perror("file open failed\n");
         exit(1);
     }
-    char*ptr;
+    char* ex_ptr,br_ptr;
     int num=0;
+    int t_branch = 0;
+    int e_branch = 0;
     while((s = getline(&line,&len,fp)) != -1){
-        ptr = strtok(line,":");
-        int execution = atoi(ptr);
-        if(execution > 0){
-            ptr = strtok(NULL,":");
-            int line_num = atoi(ptr);
-            if(list[line_num] == 0){
-                list[line_num]++;
+        if(strstr(line,":")){
+            ex_ptr = strtok(line,":");
+            int execution = atoi(ex_ptr);
+            if(execution > 0){
+                ex_ptr = strtok(NULL,":");
+                int line_num = atoi(ex_ptr);
+                if(list[line_num] == 0){
+                    list[line_num]++;
+                }
+                num++;
             }
-            num++;
+        }
+        if(strstr(line,"branch")){
+            if(strstr(line,"take")){
+                if(total_branch[t_branch] == 0){
+                    total_branch[t_branch] = 1;
+                }
+                e_branch++;
+            }
+            t_branch++;
         }
     }
-    *result = num;
+    *line_result = num;
+    *branch_result = e_branch;
     fclose(fp);
     free(line);
     free(src_file);
@@ -125,17 +143,25 @@ int* get_code_line(char* path){
     FILE* fp = fopen(path,"rb");
     int num = 0;
     int excute = 0;
+    int t_branch = 0;
     char* line = NULL;
     size_t len = 0;
-    int* size = (int*)malloc(sizeof(int)*2);
+    int* size = (int*)malloc(sizeof(int)*3);
+    char* ptr;
     while(!feof(fp) && getline(&line,&len,fp) != 1){
+        if(strstr(line,":")){
+            num++;
+        }
         if(strstr(line,"####")){
             excute++;
         }
-        num++;
+        if(strstr(line,"branch")){
+            t_branch++;
+        }
     }
     size[0] = excute;
-    size[1] = num;
+    size[1] = num - 4;
+    size[2] = t_branch;
     return size;
 }
 
@@ -153,8 +179,13 @@ void reset_gcda(char* path){
 
 void coverage_free(coverage_set_t* cover_set){
     free(cover_set->code_size);
+    
+    free(cover_set->e_branch_check);
     free(cover_set->execute_check);
+
     free(cover_set->line_check);
+    free(cover_set->branch_check);
+
     free(cover_set->src_file_name);
     free(cover_set);
 }
