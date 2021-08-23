@@ -26,6 +26,11 @@ static int passed;
 static int unresol;
 static int src_flag;
 
+static int pipe_stdin[2];
+static int pipe_stdout[2];
+static int pipe_stderr[2];
+
+
 void create_dir(){
     char template[] = "tmp.XXXXXX" ;
     char * temp_dir = mkdtemp(template) ;
@@ -68,12 +73,51 @@ void save_data(char* filename,int pipe){
     }
 }
 
+void write_result(char* inp, int inp_size,int order){
+     
+    close(pipe_stdout[1]);
+    close(pipe_stderr[1]);
+    close(pipe_stdin[1]);
+    close(pipe_stdin[0]);
+
+    char buf[1024];
+    int s;
+
+    char out_fpath[64];
+    char err_fpath[64];
+
+    sprintf(out_fpath,"%s/%d_output",dir_name,order);
+    sprintf(err_fpath,"%s/%d_error",dir_name,order);
+
+    save_data(out_fpath,pipe_stdout[0]);        
+    save_data(err_fpath,pipe_stderr[0]);
+
+    close(pipe_stderr[0]);
+    close(pipe_stdout[0]);
+}
+
+void execute_target(char* inp, int inp_size){
+    dup2(pipe_stdin[0],STDIN_FILENO);
+    dup2(pipe_stdout[1],STDOUT_FILENO);
+    dup2(pipe_stderr[1],STDERR_FILENO);
+        
+    write(pipe_stdin[1],inp,inp_size);
+    close(pipe_stdin[0]);
+    close(pipe_stdin[1]);
+    close(pipe_stdout[0]);
+    close(pipe_stderr[0]);
+
+    if(run_config.fuzz_type == 1){
+        run_config.cmd_args[run_config.args_num+1] = inp;
+    }
+
+    execv(run_config.binary_path,run_config.cmd_args);
+    perror("execv error\n");
+    exit(1);
+}
+
 int run(run_arg_t run_config ,char* random_inp,int inp_size,int order){
     
-    int pipe_stdin[2];
-    int pipe_stdout[2];
-    int pipe_stderr[2];
-
     char inp_fpath[64];
     sprintf(inp_fpath,"%s/%d_input",dir_name,order);
     int fd = open(inp_fpath,O_RDWR | O_TRUNC | O_CREAT , 0600);
@@ -109,53 +153,13 @@ int run(run_arg_t run_config ,char* random_inp,int inp_size,int order){
 
     int status;
     child = fork();
+    
     if(child > 0){
-        
-        write(pipe_stdin[1],random_inp,inp_size);
-
-        close(pipe_stdout[1]);
-        close(pipe_stderr[1]);
-        close(pipe_stdin[1]);
-        close(pipe_stdin[0]);
-
         wait(&status);
-
-        char buf[1024];
-        int s;
-
-        char out_fpath[64];
-        char err_fpath[64];
-
-        sprintf(out_fpath,"%s/%d_output",dir_name,order);
-        sprintf(err_fpath,"%s/%d_error",dir_name,order);
-
-        save_data(out_fpath,pipe_stdout[0]);        
-        save_data(err_fpath,pipe_stderr[0]);
-
-        close(pipe_stderr[0]);
-        close(pipe_stdout[0]);
-
+        write_result(random_inp,inp_size,order);
     }else if(child == 0){
         alarm(run_config.timeout);
-        dup2(pipe_stdin[0],STDIN_FILENO);
-        dup2(pipe_stdout[1],STDOUT_FILENO);
-        dup2(pipe_stderr[1],STDERR_FILENO);
-
-        close(pipe_stdin[0]);
-        close(pipe_stdin[1]);
-        close(pipe_stdout[0]);
-        close(pipe_stderr[0]);
-
-        if(run_config.fuzz_type == 1){
-            run_config.cmd_args = (char**)malloc(sizeof(char*)*3);
-            run_config.cmd_args[0] = run_config.binary_path;
-            run_config.cmd_args[1] = random_inp;
-            run_config.cmd_args[2] = NULL;
-        }
-
-        execv(run_config.binary_path,run_config.cmd_args);
-        perror("execv error\n");
-        exit(1);
+        execute_target(random_inp,inp_size);
     }else{
         perror("fork failed\n");
         exit(1);
@@ -175,6 +179,7 @@ void fuzzer_init(test_config_t* config){
             strcpy(run_config.src_path,config->run_arg.src_path);
             int src_exist = access(run_config.src_path,F_OK);
             assert(src_exist == 0 && "this file doesn't exist or can't read\n");
+
             src_flag = 1;
             char* src_filename = get_filename(run_config.src_path);
             int file_length = strlen(src_filename);
@@ -201,20 +206,23 @@ void fuzzer_init(test_config_t* config){
     input_config.f_char_start = config->inp_arg.f_char_start;
     input_config.f_char_range = config->inp_arg.f_char_range;
     
+    run_config.fuzz_type = config->run_arg.fuzz_type;
     run_config.args_num = config->run_arg.args_num;
-    run_config.cmd_args = (char**)malloc(sizeof(char*)*(run_config.args_num + 2));
+    if(run_config.fuzz_type == 1){
+        run_config.cmd_args = (char**)malloc(sizeof(char*)*(run_config.args_num + 3));
+        run_config.cmd_args[run_config.args_num+2] = NULL; 
+    }else{
+        run_config.cmd_args = (char**)malloc(sizeof(char*)*(run_config.args_num + 2));
+        run_config.cmd_args[run_config.args_num+1] = NULL;
+    }
     run_config.cmd_args[0] = (char*)malloc(sizeof(char)*(strlen(run_config.binary_path)+1));
     strcpy(run_config.cmd_args[0],run_config.binary_path);
-    run_config.cmd_args[1] = NULL;
-    run_config.fuzz_type = config->run_arg.fuzz_type;
    
     if(run_config.args_num > 0){
         for(int i = 1 ; i < run_config.args_num + 1; i++){
             run_config.cmd_args[i] = (char*)malloc(sizeof(char)*(strlen(config->run_arg.cmd_args[i-1] + 1)));
             strcpy(run_config.cmd_args[i],config->run_arg.cmd_args[i-1]);
         }
-        run_config.cmd_args[run_config.args_num+1] = "NULL";
-
     }else if(run_config.args_num < 0){
         perror("Wrong arg size\n");
         exit(1);
@@ -338,6 +346,8 @@ void fuzzer_main(test_config_t* config){
     struct itimerval t;
     time_t start,end;
     signal(SIGALRM,timeout_handler);
+    float* total_coverage = (float*)malloc(sizeof(float)*trial);
+    float* total_br_coverage = (float*)malloc(sizeof(float)*trial);
     start = clock();
     for(int i = 0; i < trial ;i++){
         //#2 fuzzer_create_input();
@@ -351,8 +361,22 @@ void fuzzer_main(test_config_t* config){
     
         if(src_flag == 1){
             coverage_gcov(cover_set->src_file_name);
-            read_gcov(run_config.src_path,&cover_set->execute_check[i],cover_set->line_check);
+            read_gcov(run_config.src_path,&cover_set->execute_check[i],&cover_set->e_branch_check[i],cover_set->line_check,cover_set->branch_check);
             reset_gcda(run_config.binary_path);
+            int exe_accumulate = 0;
+            int bran_accumulate = 0;
+            for(int i = 0; i <cover_set->code_size[1]; i++){
+                if(cover_set->line_check[i] != 0){
+                    exe_accumulate++;
+                }
+            }
+            for(int i = 0; i <cover_set->code_size[2]; i++){
+                if(cover_set->branch_check[i] != 0){
+                    bran_accumulate++;
+                }
+            }
+            total_coverage[i] = ((float)exe_accumulate/(float)cover_set->code_size[0])*100;
+            total_br_coverage[i] = ((float)bran_accumulate/(float)cover_set->code_size[2])*100;
         }
         print_result(dir_name,i,return_code);
         free(random_inp);
@@ -363,24 +387,23 @@ void fuzzer_main(test_config_t* config){
     printf("===================result summary=================\n");
     printf("excution time: %f\n",excution);
     printf("running program per sec: %f\n",trial/excution);
-    printf("failed percentage: %0.5f%%\n",failed/(float)trial);
+    printf("failed percentage: %f%%\n",(failed/(float)trial)*100);
     printf("trial: %d\nPassed: %d\nFailed: %d\n",trial,passed,failed);
     printf("\n");
     printf("===================coverage=======================\n");
     for(int i = 0; i < trial; i++){
-        printf("Trial[%d]: %0.3f%%\n",i,((float)cover_set->execute_check[i]/(float)cover_set->code_size[0])*100);
+        printf("Trial[%d]: %0.3f%%  %0.3f%%\n",i,((float)cover_set->execute_check[i]/(float)cover_set->code_size[0])*100,((float)cover_set->e_branch_check[i]/(float)cover_set->code_size[2])*100);
     }
+    printf("===================accumulate=====================\n");
+    // for(int i = 0; i < trial; i++){
+    //     printf("total average coverage : %0.3f%%  %0.3f%%\n",total_coverage[i],total_br_coverage[i]);
+    // }
+    printf("total average coverage : %0.3f%%  %0.3f%%\n",total_coverage[trial-1],total_br_coverage[trial-1]);
     printf("==================================================\n");
-    int accumulate = 0;
-    for(int i = 0; i <cover_set->code_size[1]; i++){
-        if(cover_set->line_check[i] != 0){
-            accumulate++;
-        }
-    }
-    printf("total coverage : %0.3f%%\n",((float)accumulate/(float)cover_set->code_size[0])*100);
     free(run_config.binary_path);
     free(run_config.cmd_args);
-
+    free(total_br_coverage);
+    free(total_coverage);
     if(src_flag == 1){
         free(run_config.src_path);
         coverage_free(cover_set);
