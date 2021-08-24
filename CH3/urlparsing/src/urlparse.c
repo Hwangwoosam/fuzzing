@@ -10,7 +10,7 @@ url_t* url_parse(char* str){
     if(regcomp(&state,url_regex,REG_EXTENDED)){
         perror("regcomp failed\n");
     }
-    char* match[10];
+    
     regmatch_t pmatch[6];
     int status = regexec(&state,str,6,pmatch,0);
     if(status == 0){
