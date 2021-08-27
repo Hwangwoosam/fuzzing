@@ -23,15 +23,15 @@ typedef struct run_arg{
 
 
 
-typedef struct test_config{
+typedef struct config{
     input_arg_t inp_arg;
     run_arg_t run_arg;
 
     int trial;
     int (* oracle)(char* dir_name,int trial,int ret_code);
     
-}test_config_t;
+}config_t;
 
-void init_config(test_config_t *);
+void init_config(config_t *);
 
 #endif
