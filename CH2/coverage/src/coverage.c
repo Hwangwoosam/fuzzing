@@ -1,9 +1,9 @@
 #include "../include/coverage.h"
-#include "../../Fuzzer_class/include/config.h"
+#include "../../Fuzzer/include/config.h"
 
-void coverage_init(run_arg_t run_config,coverage_set_t* cover_set,int trial){
-    coverage_compile(run_config.src_path,run_config.binary_path);
-    cover_set->src_file_name = get_filename(run_config.src_path);
+void coverage_init(config_t test_config,coverage_set_t* cover_set,int trial){
+    coverage_compile(test_config.run_arg.src_path,test_config.run_arg.binary_path);
+    cover_set->src_file_name = get_filename(test_config.run_arg.src_path);
     coverage_gcov(cover_set->src_file_name);
     char gcove_file[64];
     sprintf(gcove_file,"%s.gcov",cover_set->src_file_name);
@@ -11,10 +11,10 @@ void coverage_init(run_arg_t run_config,coverage_set_t* cover_set,int trial){
 
     cover_set->line_check = (int*)malloc(sizeof(int)*cover_set->code_size[1]);
     cover_set->branch_check = (int*)malloc(sizeof(int)*cover_set->code_size[2]);
-    cover_set->execute_check = (int*)malloc(sizeof(int)*trial);
-    cover_set->e_branch_check = (int*)malloc(sizeof(int)*trial);
-    memset(cover_set->execute_check,0,sizeof(char)*trial);
-    memset(cover_set->e_branch_check,0,sizeof(char)*trial);
+    cover_set->execute_check = (int*)malloc(sizeof(int)*test_config.trial);
+    cover_set->e_branch_check = (int*)malloc(sizeof(int)*test_config.trial);
+    memset(cover_set->execute_check,0,sizeof(char)*test_config.trial);
+    memset(cover_set->e_branch_check,0,sizeof(char)*test_config.trial);
     memset(cover_set->line_check,0,sizeof(char)*cover_set->code_size[1]);
     memset(cover_set->branch_check,0,sizeof(char)*cover_set->code_size[2]);
 }

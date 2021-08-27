@@ -5,7 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "../../Fuzzer_class/include/config.h"
+#include "../../Fuzzer/include/config.h"
 
 typedef struct coverage_set{
     int* code_size;
@@ -16,7 +16,7 @@ typedef struct coverage_set{
     int* e_branch_check;
 }coverage_set_t;
 
-void coverage_init(run_arg_t run_config,coverage_set_t* cover_set,int trial);
+void coverage_init(config_t test_config,coverage_set_t* cover_set,int trial);
 int coverage_compile(char *test_file,char* exc_file);
 int coverage_excute(char* exc_name);
 int coverage_gcov(char* test_file);
