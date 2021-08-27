@@ -1,4 +1,4 @@
-#Fuzzing: Breaking Things with Random Inputs
+#Fuzzing: Breaking Things with Random Inputs && coverage
 
 1. [Basic](https://github.com/Hwangwoosam/fuzzing/tree/master/CH2/basic)
     - this includes simple fuzzer and Fuzzing external programs.
