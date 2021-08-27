@@ -1,5 +1,9 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
 #include "./include/cgi_decode.h"
-
+// %__ he
 char hex_to_dec(char* hex_code){
     int dec[2] ={0,};
     
