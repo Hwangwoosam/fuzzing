@@ -1,7 +1,7 @@
 #Fuzzing: Breaking Things with Random Inputs
 
 1. Basic
-  - this includes simple fuzzer and Fuzzing external programs.
+    - this includes simple fuzzer and Fuzzing external programs.
 
 2. Fuzzer
   - this includes Fuzzer (white box testing,black box testing).
