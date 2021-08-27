@@ -8,8 +8,8 @@ int default_oracle(char* dir_name,int trial,int return_code){
 }
 
 //set the default value of config
-void init_config(test_config_t * config){
-    
+void init_config(config_t * config){
+
     //set the input argument
     config->inp_arg.f_min_len = 10;
     config->inp_arg.f_max_len = 100;
