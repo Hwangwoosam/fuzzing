@@ -22,7 +22,6 @@ typedef struct run_arg{
 }run_arg_t;
 
 typedef struct config{
-    
     input_arg_t inp_arg;
     run_arg_t run_arg;
 
