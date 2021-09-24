@@ -22,7 +22,10 @@ void init_config(config_t * config){
     config->run_arg.seed_file_name = NULL;
     config->run_arg.seed_file_num = 0;
     config->run_arg.args_num = 0;
-    config->run_arg.src_path = NULL;
+    config->run_arg.src_dir = NULL;
+    config->run_arg.src_file = NULL;
+    config->run_arg.src_file_num = 0;
     config->run_arg.binary_path = NULL;
     config->run_arg.fuzz_type = 0;
+    config->coverage = 0;
 }
