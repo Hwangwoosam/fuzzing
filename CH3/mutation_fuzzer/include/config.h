@@ -11,7 +11,9 @@ typedef struct input_arg{
 
 typedef struct run_arg{
     char* binary_path;
-    char* src_path;
+    char* src_dir;
+    char** src_file;
+    int src_file_num;
     char* seed_dir;
     char** seed_file_name;
     char** cmd_args;
@@ -25,6 +27,7 @@ typedef struct config{
     input_arg_t inp_arg;
     run_arg_t run_arg;
 
+    int coverage;
     int trial;
     int (* oracle)(char* dir_name,int trial,int ret_code);
     
