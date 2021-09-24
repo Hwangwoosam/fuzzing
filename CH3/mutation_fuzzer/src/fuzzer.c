@@ -194,29 +194,31 @@ void seed_search(run_arg_t* run_config){
 }
 
 void fuzzer_init(config_t* config){
-    if(config->run_arg.src_path != NULL && config->run_arg.binary_path == NULL){
-        coverage_flag = 1;
+    if(config->run_arg.src_dir == NULL){
+        perror("there is no src directory\n");
+        exit(1);
+    }else{
+        int dir_length = strlen(config->run_arg.src_dir);
+        test_config.run_arg.src_dir = (char*)malloc(sizeof(char)*(dir_length+ 1));
+        strcpy(test_config.run_arg.src_dir,config->run_arg.src_dir);
+        test_config.run_arg.src_dir[dir_length] = '\0';
     }
-    if(config->run_arg.src_path != NULL){
-        if(strlen(config->run_arg.src_path) > PATH_MAX){
-            perror("src path length is too long\n");
-            exit(1);
-        }else{
-            test_config.run_arg.src_path = (char*)malloc(sizeof(char)*(strlen(config->run_arg.src_path) + 1));
-            strcpy(test_config.run_arg.src_path,config->run_arg.src_path);
-            int src_exist = access(test_config.run_arg.src_path,F_OK);
-            assert(src_exist == 0 && "this file doesn't exist or can't read\n");
 
-            if(coverage_flag){
-                char* src_filename = get_filename(test_config.run_arg.src_path);
-                int file_length = strlen(src_filename);
-                test_config.run_arg.binary_path = (char*)malloc(sizeof(char)*file_length);
-                memcpy(test_config.run_arg.binary_path,src_filename,file_length-2);
-                free(src_filename);
-            }
+    if(config->run_arg.src_file_num > 0){
+        test_config.run_arg.src_file = (char**)malloc(sizeof(char*)*config->run_arg.src_file_num);
+        test_config.run_arg.src_file_num = config->run_arg.src_file_num; 
+        for(int i = 0; i < test_config.run_arg.src_file_num; i++){
+            int length = strlen(config->run_arg.src_file[i]);
+            test_config.run_arg.src_file[i] = (char*)malloc(sizeof(char)*(length + 1));
+            strcpy(test_config.run_arg.src_file[i],config->run_arg.src_file[i]);
+            test_config.run_arg.src_file[i][length] = '\0';
+            char file_checker[1024];
+            sprintf(file_checker,"%s/%s",test_config.run_arg.src_dir,test_config.run_arg.src_file[i]);
+            int src_exist = access(file_checker,F_OK);
+            assert(src_exist == 0 && "this file doesn't exist or can't read\n");
         }
     }
-
+    
     if(config->run_arg.binary_path != NULL){
         if(strlen(config->run_arg.binary_path) > PATH_MAX){
             perror("binary path length is too long\n");
@@ -271,6 +273,7 @@ void fuzzer_init(config_t* config){
     }
 
     test_config.run_arg.timeout = config->run_arg.timeout;
+    test_config.coverage = config->coverage;
     test_config.trial = config->trial;
     test_config.oracle = config->oracle;
     
@@ -398,18 +401,26 @@ void delete_result(){
 }
 
 void config_free(run_arg_t* run, input_arg_t* inp){
-    if(run->src_path != NULL){
-        free(run->src_path);
+    free(run->src_dir);
+
+    if(run->src_file_num > 0){
+        for(int i = 0; i < run->src_file_num;i++){
+            free(run->src_file[i]);
+        }
     }
+
     if(run->binary_path != NULL){
         free(run->binary_path); 
     }
+
     for(int i = 0; i < run->seed_file_num;i++){
         free(run->seed_file_name[i]);
     }
+
     if(run->seed_file_name !=NULL){
         free(run->seed_file_name);
     }
+
     if(run->seed_dir != NULL){
         free(run->seed_dir);
     }
@@ -423,6 +434,7 @@ void config_free(run_arg_t* run, input_arg_t* inp){
     for(int i = 0; i < run->args_num; i++){
         free(run->cmd_args[i]); 
     }
+
     free(run->cmd_args);
 }
 
@@ -430,6 +442,7 @@ char* seed_read(run_arg_t* run_config,int num,int* length){
     if(num > run_config->seed_file_num){
         perror("Wrong seed file number\n");
     }
+
     char path[256];
     sprintf(path,"%s/%s",run_config->seed_dir,run_config->seed_file_name[num]);
 
@@ -473,22 +486,30 @@ void mutate_inp(char* seed_inp,int seed_length,char* mutate_inp,int * inp_size){
 void fuzzer_main(config_t* config){
     srand(time(NULL));
     fuzzer_init(config);
-    coverage_set_t* cover_set = (coverage_set_t*)malloc(sizeof(coverage_set_t));
+    coverage_set_t* cover_set;
 
-    if(coverage_flag == 1){
-        coverage_init(test_config.run_arg,cover_set,test_config.trial);
+    if(test_config.coverage == 1){
+        cover_set = (coverage_set_t*)malloc(sizeof(coverage_set_t));
+        coverage_init(&test_config,cover_set);
     }
     
     struct itimerval t;
     time_t start,end;
     signal(SIGALRM,timeout_handler);
-    float* total_coverage = (float*)malloc(sizeof(float)*test_config.trial);
-    float* total_br_coverage = (float*)malloc(sizeof(float)*test_config.trial);
+
+    //####
+    float** total_coverage = (float**)malloc(sizeof(float*)*test_config.run_arg.src_file_num);
+    float** total_br_coverage = (float**)malloc(sizeof(float*)*test_config.run_arg.src_file_num);
+    for(int i = 0; i < test_config.run_arg.src_file_num ; i++){
+        total_coverage[i] = (float*)malloc(sizeof(float)*test_config.trial);
+        total_br_coverage[i] = (float*)malloc(sizeof(float)*test_config.trial);
+    }
+    //###
+
     start = clock();
     char* seed_inp;
     int seed_idx = 0;
     int length = 0;
-
     for(int i = 0; i < test_config.trial ;i++){
         //#2 fuzzer_create_input();
         if(i%(test_config.trial/test_config.run_arg.seed_file_num) == 0){
@@ -499,7 +520,6 @@ void fuzzer_main(config_t* config){
         }
         char* random_inp = (char*)malloc(sizeof(char)*(length+2));
         int random_size = mutate(seed_inp,random_inp,length);
-        // printf("random: %s\n",random_inp);
         if(test_config.run_arg.fuzz_type == 1){
             test_config.run_arg.cmd_args[test_config.run_arg.args_num+1] = random_inp;
         }
@@ -507,25 +527,27 @@ void fuzzer_main(config_t* config){
         int return_code = run(test_config.run_arg,random_inp,random_size,i);
         //#4 fuzzer_oracle;
         config->oracle(dir_name,i,return_code);
-    
-        if(coverage_flag == 1){
-            coverage_gcov(cover_set->src_file_name);
-            read_gcov(test_config.run_arg.src_path,&cover_set->execute_check[i],&cover_set->e_branch_check[i],cover_set->line_check,cover_set->branch_check,cover_set->branch_list,&cover_set->list_length,random_inp,random_size);
-            // reset_gcda(test_config.run_arg.binary_path);
-            int exe_accumulate = 0;
-            int bran_accumulate = 0;
-            for(int i = 0; i <cover_set->code_size[1]; i++){
-                if(cover_set->line_check[i] != 0){
-                    exe_accumulate++;
+        if(test_config.coverage == 1){
+            for(int j = 0; j < test_config.run_arg.src_file_num; j++){
+                coverage_gcov(test_config.run_arg.src_file[j],test_config.run_arg.src_dir);
+                read_gcov(cover_set,&test_config,random_inp,random_size,j,i);
+                reset_gcda(test_config,j);
+                // printf("accumulate\n");
+                int exe_accumulate = 0;
+                int bran_accumulate = 0;
+                for(int k = 0; k <cover_set->code_size[j][1]; k++){
+                    if(cover_set->line_check[j][k] != 0){
+                        exe_accumulate++;
+                    }
                 }
-            }
-            for(int i = 0; i <cover_set->code_size[2]; i++){
-                if(cover_set->branch_check[i] != 0){
-                    bran_accumulate++;
+                for(int k = 0; k <cover_set->code_size[j][2]; k++){
+                    if(cover_set->branch_check[j][k] != 0){
+                        bran_accumulate++;
+                    }
                 }
+                total_coverage[j][i] = ((float)exe_accumulate/(float)cover_set->code_size[j][1])*100;
+                total_br_coverage[j][i] = ((float)bran_accumulate/(float)cover_set->code_size[j][2])*100;
             }
-            total_coverage[i] = ((float)exe_accumulate/(float)cover_set->code_size[0])*100;
-            total_br_coverage[i] = ((float)bran_accumulate/(float)cover_set->code_size[2])*100;
         }
         print_result(dir_name,i,return_code);
         free(random_inp);
@@ -539,22 +561,58 @@ void fuzzer_main(config_t* config){
     printf("failed percentage: %f%%\n",(failed/(float)test_config.trial)*100);
     printf("trial: %d\nPassed: %d\nFailed: %d\nPerfect: %d\n",test_config.trial,passed,failed,no_err);
     printf("==================================================\n");
-    for(int i = 0; i < cover_set->list_length; i++){
-            printf("{%s , %d}\n",cover_set->branch_list[i].input,cover_set->branch_list[i].branch_num);
-    }
-    if(coverage_flag == 1){
+    if(test_config.coverage == 1){
         printf("===================coverage=======================\n");
         for(int i = 0; i < test_config.trial; i++){
-            printf("Trial[%d]: %0.3f%%  %0.3f%%\n",i,((float)cover_set->execute_check[i]/(float)cover_set->code_size[0])*100,((float)cover_set->e_branch_check[i]/(float)cover_set->code_size[2])*100);
+             printf("Trial[%d] coverage :\n",i+1);
+            for(int j = 0; j < test_config.run_arg.src_file_num; j++){
+                printf("%0.3f%%  %0.3f%%\n",total_coverage[j][i],total_br_coverage[j][i]);
+            }
+            printf("\n");
         }
-        printf("===================accumulate=====================\n");
-        printf("total average coverage : %0.3f%%  %0.3f%%\n",total_coverage[test_config.trial-1],total_br_coverage[test_config.trial-1]);
+        float total_line;
+        float total_branch;
+        printf("accumulate: \n");
+        for(int j = 0; j <cover_set->src_file_num; j++){
+            total_line = 0;
+            total_branch = 0;
+            for(int k = 0; k < cover_set->code_size[j][1]; k++){
+                if(cover_set->line_check[j][k] == 1){
+                    total_line++;
+                }
+            }
+            for(int k = 0; k < cover_set->code_size[j][2]; k++){
+                if(cover_set->branch_check[j][k] == 1){
+                    total_branch++;
+                }
+            }
+            printf("%0.3f%%  %0.3f%%\n",(total_line*100)/cover_set->code_size[j][1],(total_branch*100)/cover_set->code_size[j][2]);
+        }
         printf("==================================================\n");
-        free(total_br_coverage);
-        free(total_coverage);
-        coverage_free(cover_set);
+        char n_seed[256];
+        for(int j = 0; j < cover_set->branch_length[0]; j++){
+            memset(n_seed,0,sizeof(char)*256);
+            sprintf(n_seed,"%s/%d_new_seed",config->run_arg.seed_dir,j);
+            int seed_dir = open(n_seed,O_RDWR | O_TRUNC |O_CREAT ,0600);
+            int sent = 0;
+            int length = strlen(cover_set->branch_set[j]);
+            while(sent < length){
+                sent += write(seed_dir,cover_set->branch_set[j]+sent,length-sent);
+                if(sent == -1){
+                    perror("add seed failed\n");
+                }
+            }
+            if(close(seed_dir) == -1){
+                perror("close seed file failed\n");
+                exit(1);
+            }
+        }
+        for(int i = 0; i < test_config.run_arg.src_file_num; i++){
+            free(total_br_coverage[i]);
+            free(total_coverage[i]);
+        }
+        coverage_free(cover_set,test_config.run_arg.src_file_num);
     }
-    
     config_free(&test_config.run_arg,&test_config.inp_arg);
     delete_result();
 }
