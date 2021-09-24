@@ -1,26 +1,41 @@
 #include "../include/coverage.h"
 #include "../include/config.h"
 
-void coverage_init(run_arg_t run_config,coverage_set_t* cover_set,int trial){
-    coverage_compile(run_config.src_path,run_config.binary_path);
-    cover_set->src_file_name = get_filename(run_config.src_path);
-    coverage_gcov(cover_set->src_file_name);
-    char gcove_file[64];
-    sprintf(gcove_file,"%s.gcov",cover_set->src_file_name);
-    cover_set->code_size = get_code_line(gcove_file);
+void coverage_init(config_t* config,coverage_set_t* cover_set){
+cover_set->src_file_num = config->run_arg.src_file_num;
+cover_set->src_file_name = (char**)malloc(sizeof(char*)*config->run_arg.src_file_num);
+cover_set->line_check = (int**)malloc(sizeof(int*)*config->run_arg.src_file_num);
+cover_set->branch_check = (int**)malloc(sizeof(int*)*config->run_arg.src_file_num);
+cover_set->execute_check = (int**)malloc(sizeof(int*)*config->run_arg.src_file_num);
+cover_set->e_branch_check = (int**)malloc(sizeof(int*)*config->run_arg.src_file_num);
+cover_set->code_size = (int**)malloc(sizeof(int*)*config->run_arg.src_file_num);
+cover_set->branch_set = (char**)malloc(sizeof(char*)*config->trial);
+cover_set->branch_length = (int*)malloc(sizeof(int));
+*cover_set->branch_length = 0;
+    for(int i = 0; i < config->run_arg.src_file_num; i++){
+        cover_set->src_file_name[i] = (char*)malloc(sizeof(char)*(strlen(config->run_arg.src_file[i]) + 1));
+        if(get_filename(config->run_arg.src_file[i],cover_set->src_file_name[i]) < 0){
+            perror("get filename failed\n");
+            exit(1);
+        }
+        int ret = coverage_gcov(cover_set->src_file_name[i],config->run_arg.src_dir);
+        if(ret < 0){
+            perror("coverage gcov failed\n");
+            exit(1);
+        }
+        char gcove_file[256];
+        sprintf(gcove_file,"%s/%s.c.gcov",config->run_arg.src_dir,cover_set->src_file_name[i]);
+        cover_set->code_size[i] = get_code_line(gcove_file);
+        cover_set->line_check[i]= (int*)malloc(sizeof(int)*cover_set->code_size[i][1]);
+        cover_set->branch_check[i] = (int*)malloc(sizeof(int)*cover_set->code_size[i][2]);
+        cover_set->execute_check[i] = (int*)malloc(sizeof(int)*config->trial);
+        cover_set->e_branch_check[i] = (int*)malloc(sizeof(int)*config->trial);
 
-    cover_set->line_check = (int*)malloc(sizeof(int)*cover_set->code_size[1]);
-    cover_set->branch_check = (int*)malloc(sizeof(int)*cover_set->code_size[2]);
-    cover_set->execute_check = (int*)malloc(sizeof(int)*trial);
-    cover_set->e_branch_check = (int*)malloc(sizeof(int)*trial);
-    cover_set->branch_list = (branch_set_t*)malloc(sizeof(branch_set_t)*cover_set->code_size[2]);
-
-    cover_set->list_length = 0;
-
-    memset(cover_set->execute_check,0,sizeof(char)*trial);
-    memset(cover_set->e_branch_check,0,sizeof(char)*trial);
-    memset(cover_set->line_check,0,sizeof(char)*cover_set->code_size[1]);
-    memset(cover_set->branch_check,0,sizeof(char)*cover_set->code_size[2]);
+        memset(cover_set->execute_check[i],0,sizeof(int)*config->trial);
+        memset(cover_set->e_branch_check[i],0,sizeof(int)*config->trial);
+        memset(cover_set->line_check[i],0,sizeof(int)*cover_set->code_size[i][1]);
+        memset(cover_set->branch_check[i],0,sizeof(int)*cover_set->code_size[i][2]);
+    }
 }
 
 int coverage_compile(char *test_file,char* exc_file){
@@ -64,10 +79,11 @@ int coverage_excute(char* exc_name){
     return status;
 }
 
-int coverage_gcov(char* test_file){
+int coverage_gcov(char* test_file,char* srd_dir){
     int pid = fork();
     int status;
     if(pid == 0){
+        chdir(srd_dir);
         char* args[] = {"/usr/bin/gcov","-b","-c",test_file,NULL}; 
         execv("/usr/bin/gcov",args);
 
@@ -82,74 +98,90 @@ int coverage_gcov(char* test_file){
     return status;
 }
 
-char* get_filename(char* path){
-    int path_length = strlen(path);
+int get_filename(char* file_name,char* target){
+    int path_length = strlen(file_name);
     int idx = 0;
     for(int i = path_length; i >= 0; i--){
-        if(path[i] == '/'){
+        if(file_name[i] == '.'){
             idx = i;
             break;
         }
     }
-    char* cpy_file_name = (char*)malloc(sizeof(char)*(path_length+1));
-    memcpy(cpy_file_name,path+idx+1,path_length-idx+1);
-    return cpy_file_name;
+    if(strncpy(target,file_name,idx) == NULL){
+        perror("get filename failed to memcpy\n");
+        return -1;
+    }
+    target[idx] = '\0';
+    return 0;
 }
 
-void read_gcov(char* path,int* line_result,int* branch_result,int* list,int* total_branch,branch_set_t* branch_list,int* list_length,char* random, int random_size){
-    char* src_file = get_filename(path);
-    FILE* fp;
-    char* line = (char*)malloc(sizeof(char)*256) ;
-    size_t len = 256;
-    int s;
-    char gcove_file[64];
-    sprintf(gcove_file,"%s.gcov",src_file);
-    fp = fopen(gcove_file,"r");
+void read_gcov(coverage_set_t* cover_set,config_t* config,char* random, int random_size,int src_num,int trial){   
+    char src_file[64];
+    memset(src_file,0,sizeof(char)*64);
+    int ret = get_filename(config->run_arg.src_file[src_num],src_file);
+    char* line = NULL;
+    char token[1024];
+    char token2[1024];
+    size_t len = 0;
+    ssize_t s;
+    char gcove_file[256];
+    sprintf(gcove_file,"%s/%s.c.gcov",config->run_arg.src_dir,src_file);
+    FILE* fp = fopen(gcove_file,"r");
     if(fp == NULL){
         perror("file open failed\n");
         exit(1);
-    }
-    char* ex_ptr,br_ptr;
-    int num=0;
-    int t_branch = 0;
-    int e_branch = 0;
-    int line_num = 0;
-    int before_branch = 0;
-    while((s = getline(&line,&len,fp)) != -1){
-        if(strstr(line,":")){
-            ex_ptr = strtok(line,":");
-            int execution = atoi(ex_ptr);
-            if(execution > 0){
-                ex_ptr = strtok(NULL,":");
-                line_num = atoi(ex_ptr);
-                if(list[line_num] == 0){
-                    list[line_num]++;
+    }else{
+        char* ex_ptr;
+        int num=0;
+        int t_branch = 0;
+        int e_branch = 0;
+        int line_num = 0;
+
+        int n_flag = 0;
+        while(!feof(fp)){
+            if((s = getline(&line,&len,fp)) != -1){
+                memset(token,0,1024);
+                memset(token2,0,1024);
+                strcpy(token,line);
+                strcpy(token2,line);
+                if(strstr(token,":")){
+                    ex_ptr = strtok(token,":");
+                    int execution = atoi(ex_ptr);
+                    if(execution > 0){
+                        ex_ptr = strtok(NULL,":");
+                        line_num = atoi(ex_ptr);
+                        if(cover_set->line_check[src_num][line_num] == 0){
+                            cover_set->line_check[src_num][line_num] = 1;
+                            n_flag = 1;
+                        }
+                        num++;
+                    }
+                }else{
+                    if(strstr(token2,"branch")){
+                        if(strstr(token2,"take")){
+                            if(cover_set->branch_check[src_num][t_branch] == 0){
+                                cover_set->branch_check[src_num][t_branch] = 1;
+                                n_flag = 1;
+                            }
+                            e_branch++;
+                        }
+                        t_branch++;
+                    }
                 }
-                num++;
             }
         }
-        if(strstr(line,"branch")){
-            if(strstr(line,"take")){
-                if(total_branch[t_branch] == 0){
-                    total_branch[t_branch] = 1;
-                    if(before_branch != line_num){
-                        branch_list[*list_length].branch_num = line_num;
-                        branch_list[*list_length].input = (char*)malloc(sizeof(char)*random_size);
-                        strcpy(branch_list[*list_length].input,random);
-                        *list_length += 1;
-                        before_branch = line_num;
-                    }                 
-                }
-                e_branch++;
-            }
-            t_branch++;
+        if(n_flag == 1){
+            int list_length = cover_set->branch_length[0];
+            cover_set->branch_set[list_length] = (char*)malloc(sizeof(char)*random_size+1);
+            strcpy(cover_set->branch_set[list_length],random);
+            cover_set->branch_set[list_length][random_size] = '\0';
+            cover_set->branch_length[0]++;
         }
+        cover_set->e_branch_check[src_num][trial] = num;
+        cover_set->execute_check[src_num][trial] = e_branch;   
+        free(line);
+        fclose(fp);
     }
-    *line_result = num;
-    *branch_result = e_branch;
-    fclose(fp);
-    free(line);
-    free(src_file);
 }
 
 int* get_code_line(char* path){
@@ -179,10 +211,11 @@ int* get_code_line(char* path){
 }
 
 
-void reset_gcda(char* path){
-    int path_length = strlen(path);
-    char* gcda_path = (char*)malloc(sizeof(char)*(path_length+3));
-    sprintf(gcda_path,"./%s.gcda",path);
+void reset_gcda(config_t config,int src_num){
+    char * target_file = (char*)malloc(sizeof(char)*(strlen(config.run_arg.src_file[src_num]) + 1));
+    int ret = get_filename(config.run_arg.src_file[src_num],target_file);
+    char gcda_path[256];
+    sprintf(gcda_path,"%s/%s.gcda",config.run_arg.src_dir,target_file);
     if(access(gcda_path,R_OK) == 0){
         if(remove(gcda_path) != 0){
             perror("remove error\n");
@@ -190,19 +223,19 @@ void reset_gcda(char* path){
     }
 }
 
-void coverage_free(coverage_set_t* cover_set){
+void coverage_free(coverage_set_t* cover_set,int num){
+    for(int i = 0; i < num ; i++){
+        free(cover_set->code_size[i]);
+        free(cover_set->e_branch_check[i]);
+        free(cover_set->execute_check[i]);
+        free(cover_set->line_check[i]);
+        free(cover_set->branch_check[i]);
+        free(cover_set->src_file_name[i]);
+    }
     free(cover_set->code_size);
-    
     free(cover_set->e_branch_check);
     free(cover_set->execute_check);
-
     free(cover_set->line_check);
     free(cover_set->branch_check);
-
     free(cover_set->src_file_name);
-    for(int i = 0; i < cover_set->list_length; i++){
-        free(cover_set->branch_list[i].input);
-    }
-    free(cover_set->branch_list);
-    free(cover_set);
 }
