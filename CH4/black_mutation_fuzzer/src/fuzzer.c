@@ -57,9 +57,20 @@ void save_data(char* filename,int pipe){
 
     int total = 0;
     int sent = 0;
+    
+    int fd = open(filename,O_RDWR | O_TRUNC | O_CREAT , 0600);
+    
+    if(fd < 0){
+        perror("output fd open failed\n");
+        exit(1);
+    }
+    
     while((sent=read(pipe,buf,BUFFER_SIZE)) > 0){
+
         if(total + sent > BUFFER_SIZE){
+            
             char* check = realloc(content,sizeof(char)*((total/BUFFER_SIZE)+1)*BUFFER_SIZE);
+
             if(check == NULL){
                 perror("save data failed to realloc\n");
                 exit(1);
@@ -71,29 +82,21 @@ void save_data(char* filename,int pipe){
             exit(1);
         }
 
+        if(total > 0){
+            sent = 0;
+            while(sent < total){
+                sent += write(fd,content,total-sent);
+            }
+            total = 0;
+        }
+
         if(memset(buf,0,BUFFER_SIZE) == NULL){
             perror("save data memset failed\n");
         }
-
-        total += sent;
     }
     
     close(pipe);
     
-    int fd = open(filename,O_RDWR | O_TRUNC | O_CREAT , 0600);
-    
-    if(fd < 0){
-        perror("output fd open failed\n");
-        exit(1);
-    }
-
-    if(total > 0){
-        sent = 0;
-        while(sent < total){
-            sent += write(fd,content,total-sent);
-        }
-    }
-
     if(close(fd) == -1 ){
         perror("output fd close failed\n");
         exit(1);
