@@ -87,7 +87,7 @@ int flip_random(char* str, char* target ,int str_size){
         target[pos] = new_c;
     }
 
-    target[str_size] ='\0';
+    target[str_size-1] ='\0';
     return str_size;
 } 
 
@@ -118,8 +118,8 @@ int delete_random(char* str,char* target, int str_size,int byte){
         return -1;
     }
 
-    target[str_size-byte] ='\0';
-    return str_size - 1;
+    target[str_size-byte - 1] ='\0';
+    return str_size - byte;
 }
 
 int insert_random(char* str, char* target, int str_size,int byte){
@@ -128,12 +128,15 @@ int insert_random(char* str, char* target, int str_size,int byte){
     switch (operator)
     {
     case 0:
+        
         length = random_value(str,target,str_size,byte);
         return length;
     case 1:
+
         length = simple_arithmatic_insert(str,target,str_size,byte);
         return length;
     case 2:
+        
         length = known_integers_insert(str,target,str_size,byte);
         return length;
     default:
@@ -144,18 +147,23 @@ int insert_random(char* str, char* target, int str_size,int byte){
 int change_random(char* str, char* target, int str_size,int byte){
     int operator = rand()%4;
     int length;
+
     switch (operator)
     {
     case 0:
+        
         length = byte_flip(str,target,str_size,byte);
         return length;
     case 1:
+        
         length = simple_arithmatic_change(str,target,str_size,byte);
         return length;
     case 2:
+        
         length = known_integers_change(str,target,str_size,byte);
         return length;
     case 3:
+        
         length = flip_random(str,target,str_size);
         return length;
     default:
@@ -187,8 +195,8 @@ int random_value(char* str, char* target, int str_size, int byte){
         return -1;
     }
 
-    target[str_size+byte + 1] ='\0';
-    return str_size + 1;
+    target[str_size + byte - 1] ='\0';
+    return str_size + byte;
 }
 
 int byte_flip(char* str, char* target ,int str_size,int byte){
@@ -214,8 +222,8 @@ int byte_flip(char* str, char* target ,int str_size,int byte){
         new_char = (char) str[pos + i] ^ 0xff;
         target[pos + i] = new_char;
    }
-    target[str_size] = 0x0;
-    return 1;
+    target[str_size - 1] = '\0';
+    return str_size;
 }
 
 int simple_arithmatic_insert(char* str,char* target,int str_size,int byte){
@@ -224,7 +232,7 @@ int simple_arithmatic_insert(char* str,char* target,int str_size,int byte){
         return -1;
     }
 
-    int pos = rand()% str_size;
+    int pos = rand()%str_size;
     if(memcpy(target,str,pos) == NULL){
         perror("simple arithmatic insert memcpy failed\n");
         return -1;
@@ -237,8 +245,8 @@ int simple_arithmatic_insert(char* str,char* target,int str_size,int byte){
         perror("simple arithmatic insert2 memcpy failed\n");
         return -1;
     }
-    target[str_size + byte] = '\0';
-    return 1;
+    target[str_size + byte - 1] = '\0';
+    return str_size + byte;
 }
 
 int simple_arithmatic_change(char* str,char* target,int str_size,int byte){
@@ -246,7 +254,12 @@ int simple_arithmatic_change(char* str,char* target,int str_size,int byte){
         perror("input is NULL");
         return -1;
     }
-    int pos = rand()% (str_size-byte);
+    int pos;
+    if(str_size == byte){
+        pos = 0;
+    }else{
+        pos = rand()% (str_size-byte);
+    }
     if(memcpy(target,str,pos) == NULL){
         perror("simple arithmatic insert memcpy failed\n");
         return -1;
@@ -259,27 +272,10 @@ int simple_arithmatic_change(char* str,char* target,int str_size,int byte){
         perror("simple arithmatic insert2 memcpy failed\n");
         return -1;
     }
-    target[str_size + byte] = '\0';
-    return 1;
+    target[str_size - 1] = '\0';
+    return str_size;
 }
 
-
-// int copy_offset(char* str,char* target, int str_size,int byte){
-//     if(str_size <= 0){
-//         perror("input is NULL");
-//         return -1;
-//     }
-//     int mem_cpy = rand()%(str_size-byte);
-//     int pos = rand()%str_size;
-//     if(memcpy(target,str,pos) == NULL){
-//         perror("flip memcpy failed\n");
-//         return -1;
-//     }
-
-//     if(memcpy(target + pos,str + mem_cpy) == NULL){
-
-//     }
-// }
 
 int known_integers_insert(char* str, char* target ,int str_size,int byte){
 
@@ -292,7 +288,6 @@ int known_integers_insert(char* str, char* target ,int str_size,int byte){
     int pos = rand()%str_size;
     int category = rand()%3;
     int index = rand()%known_integer[category];
-    
     if(memcpy(target,str,pos) == NULL){
         perror("flip memcpy failed\n");
         return -1;
@@ -319,8 +314,8 @@ int known_integers_insert(char* str, char* target ,int str_size,int byte){
         perror("flip memcpy failed\n");
         return -1;
     }
-    target[str_size + byte] = 0x0;
-    return 1;
+    target[str_size + byte - 1] = '\0';
+    return str_size + byte;
 }
 
 int known_integers_change(char* str, char* target ,int str_size,int byte){
@@ -364,9 +359,9 @@ int known_integers_change(char* str, char* target ,int str_size,int byte){
     }
 
     target[pos] = new_char;
-    target[str_size] = 0x0;
+    target[str_size - 1] = '\0';
 
-    return 1;
+    return str_size;
 }
 
 
@@ -384,13 +379,17 @@ int mutate(char* str,char* target,int str_size){
     }
 
     if(random_num == 0){
+
        return delete_random(str,target,str_size,byte_size[byte]);
 
     }else if(random_num == 1){
+
        return insert_random(str,target,str_size,byte_size[byte]);
 
     }else{
-       return change_random(str,target,str_size,byte_size[byte]);      
+
+       return change_random(str,target,str_size,byte_size[byte]);
+
     }
 
     return - 1;

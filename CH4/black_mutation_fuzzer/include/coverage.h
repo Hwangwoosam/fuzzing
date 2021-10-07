@@ -6,17 +6,24 @@
 #include <unistd.h>
 #include "config.h"
 #include <sys/wait.h>
+typedef struct branch_set{
+    char** input;
+    int* input_length;
+    int branch_length;
+    int* line_num;
+}branch_set_t;
 
 typedef struct coverage_set{
-    int** code_size;
-    char** src_file_name;
+    int* code_size[NUM_OF_MAX];
+    char* src_file_name[NUM_OF_MAX];
     int src_file_num;
-    int** line_check;     // total line
-    int** execute_check;  // excute line
-    int** branch_check;
-    int** e_branch_check;
-    char** branch_set;
-    int* branch_length;
+    int* line_check[NUM_OF_MAX];     // total line
+    int* e_line_check[NUM_OF_MAX];  // excute line
+    int* branch_check[NUM_OF_MAX];
+    int* e_branch_check[NUM_OF_MAX];
+    int* total_excute_line;
+    int* total_excute_branch;
+    branch_set_t branch_set;
 }coverage_set_t;
 
 void coverage_init(config_t* config,coverage_set_t* cover_set);

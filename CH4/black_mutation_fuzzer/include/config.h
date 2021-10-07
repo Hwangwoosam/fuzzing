@@ -2,6 +2,10 @@
 #define CONFIG
 #define PATH_MAX 4096
 
+#define NUM_OF_MAX 100
+#define BUFFER_SIZE 4096
+#define FILE_NAME_MAX 1024
+
 typedef struct input_arg{
     int f_min_len;
     int f_max_len;
@@ -11,12 +15,16 @@ typedef struct input_arg{
 
 typedef struct run_arg{
     char* binary_path;
-    char* src_dir;
-    char** src_file;
+    char* src_file[NUM_OF_MAX];
+    
     int src_file_num;
-    char* seed_dir;
-    char** seed_file_name;
+    
+    char src_dir[PATH_MAX];
+    char seed_dir[PATH_MAX];
+    char* seed_file_name[NUM_OF_MAX];
+    int seed_length[NUM_OF_MAX];
     char** cmd_args;
+    
     int seed_file_num;
     int args_num;
     int timeout;

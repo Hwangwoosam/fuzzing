@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <assert.h>
 #include <signal.h>
 #include <sys/time.h>
@@ -9,22 +10,20 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
-
 #include "../include/create_inp.h"
 #include "../include/fuzzer.h"
 #include "../include/coverage.h"
+#include "../include/sched.h"
 
 static config_t test_config; 
 static pid_t child;
 
 static int (* oracle) (char * dir_name,int trial,int ret_code) ;
 
-static char dir_name[20];
-static int failed,backslash,no_8,no_d;
+static char tmp_dir_name[20];
+static int failed;
 static int passed;
 static int unresol;
-static int no_err;
-static int coverage_flag;
 
 static int pipe_stdin[2];
 static int pipe_stdout[2];
@@ -37,7 +36,7 @@ void create_dir(){
         perror("mkdtemp") ;
         exit(1) ;
     }
-    strcpy(dir_name, temp_dir) ;
+    strcpy(tmp_dir_name, temp_dir) ;
 }
 
 void timeout_handler(int sig){
@@ -51,18 +50,47 @@ void timeout_handler(int sig){
 }
 
 void save_data(char* filename,int pipe){
-    char buf[1024];
+    
+    char* content = (char*)malloc(sizeof(char)*BUFFER_SIZE);
+    
+    char buf[BUFFER_SIZE];
+
+    int total = 0;
+    int sent = 0;
+    while((sent=read(pipe,buf,BUFFER_SIZE)) > 0){
+        if(total + sent > BUFFER_SIZE){
+            char* check = realloc(content,sizeof(char)*((total/BUFFER_SIZE)+1)*BUFFER_SIZE);
+            if(check == NULL){
+                perror("save data failed to realloc\n");
+                exit(1);
+            }
+        }
+        
+        if(memcpy(content + total,buf,sent) == NULL){
+            perror("save data failed to memcpy\n");
+            exit(1);
+        }
+
+        if(memset(buf,0,BUFFER_SIZE) == NULL){
+            perror("save data memset failed\n");
+        }
+
+        total += sent;
+    }
+    
+    close(pipe);
+    
     int fd = open(filename,O_RDWR | O_TRUNC | O_CREAT , 0600);
     
     if(fd < 0){
         perror("output fd open failed\n");
         exit(1);
     }
-    int s;
-    while((s=read(pipe,buf,1024)) > 0){
-        int sent = 0;
-        while(sent < s){
-            sent += write(fd,buf+sent,s-sent);
+
+    if(total > 0){
+        sent = 0;
+        while(sent < total){
+            sent += write(fd,content,total-sent);
         }
     }
 
@@ -70,6 +98,8 @@ void save_data(char* filename,int pipe){
         perror("output fd close failed\n");
         exit(1);
     }
+
+    free(content);
 }
 
 void write_result(char* inp, int inp_size,int order){
@@ -79,38 +109,66 @@ void write_result(char* inp, int inp_size,int order){
     close(pipe_stdin[1]);
     close(pipe_stdin[0]);
 
-    char buf[1024];
+    char buf[BUFFER_SIZE];
     int s;
 
-    char out_fpath[64];
-    char err_fpath[64];
+    char out_fpath[PATH_MAX];
+    char err_fpath[PATH_MAX];
+    char inp_fpath[PATH_MAX];
+    sprintf(inp_fpath,"%s/%d_input",tmp_dir_name,order);
+    sprintf(out_fpath,"%s/%d_output",tmp_dir_name,order);
+    sprintf(err_fpath,"%s/%d_error",tmp_dir_name,order);
 
-    sprintf(out_fpath,"%s/%d_output",dir_name,order);
-    sprintf(err_fpath,"%s/%d_error",dir_name,order);
+    int fd = open(inp_fpath, O_RDWR | O_TRUNC | O_CREAT , 0600);
+
+    if(fd < 0){
+        perror("input fd open failed\n");
+        exit(1);
+    }
+    int sent = 0;
+
+    while(sent < inp_size){
+        sent += write(fd,inp+sent,inp_size-sent);
+        if(sent == -1){
+            perror("input write error\n");
+            exit(1);
+        }
+    }
+
+    if(close(fd) == -1 ){
+        perror("input fd close failed\n");
+        exit(1);
+    }
+
+    close(fd);
 
     save_data(out_fpath,pipe_stdout[0]);        
     save_data(err_fpath,pipe_stderr[0]);
 
-    close(pipe_stderr[0]);
-    close(pipe_stdout[0]);
 }
 
 void execute_target(char* inp, int inp_size){
-    dup2(pipe_stdin[0],STDIN_FILENO);
-    dup2(pipe_stdout[1],STDOUT_FILENO);
-    dup2(pipe_stderr[1],STDERR_FILENO);
     int sent = 0;
     while(sent < inp_size){
         sent += write(pipe_stdin[1],inp + sent,inp_size - sent);
     }
-    close(pipe_stdin[0]);
     close(pipe_stdin[1]);
+
+    dup2(pipe_stdin[0],0);
+    
+    close(pipe_stdin[0]);
     close(pipe_stdout[0]);
     close(pipe_stderr[0]);
+
+    dup2(pipe_stdout[1],STDOUT_FILENO);
+    dup2(pipe_stderr[1],STDERR_FILENO);
 
     if(test_config.run_arg.fuzz_type == 1){
         test_config.run_arg.cmd_args[test_config.run_arg.args_num+1] = inp;
     }
+
+    close(pipe_stderr[1]);
+    close(pipe_stdout[1]);
 
     execv(test_config.run_arg.binary_path,test_config.run_arg.cmd_args);
     perror("execv error\n");
@@ -118,26 +176,6 @@ void execute_target(char* inp, int inp_size){
 }
 
 int run(run_arg_t run_config ,char* random_inp,int inp_size,int order){
-
-    char inp_fpath[64];
-    sprintf(inp_fpath,"%s/%d_input",dir_name,order);
-    int fd = open(inp_fpath,O_RDWR | O_TRUNC | O_CREAT , 0600);
-    if(fd < 0){
-        perror("input fd open failed\n");
-        exit(1);
-    }
-    int sent = 0;
-    while(sent < inp_size){
-        sent += write(fd,random_inp+sent,inp_size-sent);
-        if(sent == -1){
-            perror("input write error\n");
-            exit(1);
-        }
-    }
-    if(close(fd) == -1 ){
-        perror("input fd close failed\n");
-        exit(1);
-    }
 
     if(pipe(pipe_stdin) != 0) {
         perror("stdin pipe error\n") ;
@@ -147,7 +185,8 @@ int run(run_arg_t run_config ,char* random_inp,int inp_size,int order){
         perror("stdout pipe error\n") ;
         exit(1) ;
     }
-     if (pipe(pipe_stderr) != 0) {
+
+    if (pipe(pipe_stderr) != 0) {
         perror("stderr pipe error\n") ;
         exit(1) ;
     }
@@ -156,90 +195,168 @@ int run(run_arg_t run_config ,char* random_inp,int inp_size,int order){
     child = fork();
     
     if(child > 0){
-        close(pipe_stdout[1]);
-        close(pipe_stderr[1]);
-        close(pipe_stdin[1]);
-        close(pipe_stdin[0]);
-        wait(&status);
-        write_result(random_inp,inp_size,order);
 
+        write_result(random_inp,inp_size,order);
+    
     }else if(child == 0){
+
         alarm(run_config.timeout);
         execute_target(random_inp,inp_size);
+
     }else{
         perror("fork failed\n");
         exit(1);
     }
+    wait(&status);
+
     return status;
 }
-
 
 void seed_search(run_arg_t* run_config){
     DIR * dp;
     struct dirent * ep;
     dp = opendir(run_config->seed_dir);
-    run_config->seed_file_name = (char**)calloc(1,sizeof(char*)*512);
     int idx = 0;
 
     while(ep = readdir(dp)){
         if(ep->d_type == DT_REG){
-            int length = strlen(ep->d_name);
-            run_config->seed_file_name[idx] = (char*)malloc(sizeof(char)*(length + 1));
-            strcpy(run_config->seed_file_name[idx],ep->d_name);
-            run_config->seed_file_name[idx][length] = '\0';
+
+            int seed_dir_length = strlen(run_config->seed_dir);
+
+            int name_length = strlen(ep->d_name);
+
+            char* path = (char*)malloc(sizeof(char) * (seed_dir_length + name_length + 2 ));
+
+            sprintf(path,"%s/%s",run_config->seed_dir,ep->d_name);
+
+            char buf[BUFFER_SIZE];
+    
+            FILE* fp = fopen(path,"rb");
+
+            int total_len = 0;
+            int sent = 0;
+
+            run_config->seed_file_name[idx] = (char*)malloc(sizeof(char)* BUFFER_SIZE);
+
+            while((sent = fread(buf,sizeof(char),BUFFER_SIZE,fp)) > 0){
+                if(total_len + sent > BUFFER_SIZE){
+                char* check = realloc(run_config->seed_file_name[idx],sizeof(char)*((total_len/BUFFER_SIZE)+1)*BUFFER_SIZE);
+                    if(check == NULL){
+                        perror("failed to realloc\n");
+                        exit(0);
+                    }        
+                }
+
+                if(memcpy(run_config->seed_file_name[idx] + total_len,buf,sent) == NULL){
+                    perror("seed_read memcpy failed\n");
+                    return;
+                }
+
+                if(memset(buf,0,BUFFER_SIZE) == NULL){
+                    perror("buf memset failed\n");
+                }
+
+                total_len += sent;
+            }
+
+            fclose(fp);
+            
+            if(total_len == 0){
+                perror("No seed_input\n");
+                return;
+            }
+
+            run_config->seed_file_name[idx][total_len] ='\0';
+            run_config->seed_length[idx] = total_len;
+            
+            free(path);
+
             idx++;
         }
     }
     run_config->seed_file_num = idx;
+    closedir(dp);
 }
 
 void fuzzer_init(config_t* config){
+
+    //src directory copy
     if(config->run_arg.src_dir == NULL){
+
         perror("there is no src directory\n");
         exit(1);
+
     }else{
+
         int dir_length = strlen(config->run_arg.src_dir);
-        test_config.run_arg.src_dir = (char*)malloc(sizeof(char)*(dir_length+ 1));
+
         strcpy(test_config.run_arg.src_dir,config->run_arg.src_dir);
-        test_config.run_arg.src_dir[dir_length] = '\0';
     }
 
+    //all src file name copy
     if(config->run_arg.src_file_num > 0){
-        test_config.run_arg.src_file = (char**)malloc(sizeof(char*)*config->run_arg.src_file_num);
+
         test_config.run_arg.src_file_num = config->run_arg.src_file_num; 
+        
         for(int i = 0; i < test_config.run_arg.src_file_num; i++){
+
             int length = strlen(config->run_arg.src_file[i]);
+
             test_config.run_arg.src_file[i] = (char*)malloc(sizeof(char)*(length + 1));
+
             strcpy(test_config.run_arg.src_file[i],config->run_arg.src_file[i]);
-            test_config.run_arg.src_file[i][length] = '\0';
-            char file_checker[1024];
+
+            int src_dir_length = strlen(test_config.run_arg.src_dir);
+
+            int src_file_length = strlen(test_config.run_arg.src_file[i]);
+
+            char* file_checker = (char*)malloc(sizeof(char)* (src_dir_length + src_file_length + 2 ));
+
             sprintf(file_checker,"%s/%s",test_config.run_arg.src_dir,test_config.run_arg.src_file[i]);
+            
             int src_exist = access(file_checker,F_OK);
             assert(src_exist == 0 && "this file doesn't exist or can't read\n");
+
+            free(file_checker);
         }
     }
     
+    //binary path copy
     if(config->run_arg.binary_path != NULL){
+
         if(strlen(config->run_arg.binary_path) > PATH_MAX){
+
             perror("binary path length is too long\n");
             exit(1);
+
         }else{
+
             test_config.run_arg.binary_path = (char*)malloc(sizeof(char)*(strlen(config->run_arg.binary_path)+1));
+
             strcpy(test_config.run_arg.binary_path,config->run_arg.binary_path);
+            
             int binary_exist = access(test_config.run_arg.binary_path,X_OK);
             assert(binary_exist == 0 && "this file doesn't exist or can't excute\n");
+
         }
     }
 
+    //seed dirtory copy
     if(config->run_arg.seed_dir != NULL){
+
         if(strlen(config->run_arg.seed_dir) > PATH_MAX){
+
             perror("src path length is too long\n");
             exit(1);
+
         }else{
-            test_config.run_arg.seed_dir = (char*)malloc(sizeof(char)*(strlen(config->run_arg.seed_dir)+1));
+
             strcpy(test_config.run_arg.seed_dir,config->run_arg.seed_dir);
+
             int seed_exist = access(test_config.run_arg.seed_dir,00);
             assert(seed_exist == 0 && "this dirtory doesn't exist or can't excute\n");
+
+            //get seed
             seed_search(&test_config.run_arg);
         }
     }
@@ -263,11 +380,14 @@ void fuzzer_init(config_t* config){
     strcpy(test_config.run_arg.cmd_args[0],test_config.run_arg.binary_path);
    
     if(test_config.run_arg.args_num > 0){
+
         for(int i = 1 ; i < test_config.run_arg.args_num + 1; i++){
             test_config.run_arg.cmd_args[i] = (char*)malloc(sizeof(char)*(strlen(config->run_arg.cmd_args[i-1] + 1)));
             strcpy(test_config.run_arg.cmd_args[i],config->run_arg.cmd_args[i-1]);
         }
+
     }else if(test_config.run_arg.args_num < 0){
+
         perror("Wrong arg size\n");
         exit(1);
     }
@@ -306,102 +426,26 @@ void fuzzer_init(config_t* config){
     create_dir();
 }
 
-void print_result(char* dir_name,int num,int return_code){
-    char out_path[64];
-    char err_path[64];
-    char inp_path[64];
-    sprintf(inp_path,"%s/%d_input",dir_name,num);
-    sprintf(err_path,"%s/%d_error",dir_name,num);
-    sprintf(out_path,"%s/%d_output",dir_name,num);
-
-    int out_fd = open(out_path,O_RDONLY,0600);
-    int err_fd = open(err_path,O_RDONLY,0600);
-    int inp_fd = open(inp_path,O_RDONLY,0600);
-
-    if(out_fd < 0){
-        perror("print result output fd open failed\n");
-        exit(1);
-    }
-
-    if(err_fd < 0){
-        perror("print result error fd open failed\n");
-        exit(1);
-    }
-    
-    if(inp_fd < 0){
-        perror("print result input fd open failed\n");
-        exit(1);
-    }
-    int out_s,err_s,inp_s;
-
-    char inp_buf[1024]={0,};
-    char out_buf[1024]={0,};
-    char err_buf[1024]={0,};
-    if((out_s = read(out_fd,out_buf,1023)) < 0){
-        perror("read output error\n");
-    }
-    if((err_s = read(err_fd,err_buf,1023)) < 0){
-        perror("read error error\n");
-    }
-
-    if((inp_s = read(inp_fd,inp_buf,1023)) < 0){
-        perror("read input error\n");
-    }
-    
-    if(close(out_fd) == -1 ){
-        perror("print result output fd close failed\n");
-        exit(1);
-    }
-
-    if(close(err_fd) == -1 ){
-        perror("print result error fd close failed\n");
-        exit(1);
-    }
-
-    if(close(inp_fd) == -1){
-        perror("print result input fd close failed\n");
-        exit(1);
-    }
-    inp_buf[inp_s] ='\0';
-    out_buf[out_s] ='\0';
-    err_buf[err_s] ='\0';
-
-    if(return_code == 0){
-        passed++;
-        if(err_s == 0){
-            no_err++;
-        }
-        // printf("input: %s\noutput: %s\nerror: %s\nreturn code: \"PASS\"\n\n",inp_buf,out_buf,err_buf);
-    }else if(return_code > 0){
-        failed++;
-        // printf("input: %s\noutput: %s\nerror: %s\nreturn code: \"Failed\"\n\n",inp_buf,out_buf,err_buf);
-    }else{
-        unresol++;
-        // printf("input: %s\noutput: %s\nerror: %s\nreturn code: \"UNRESOLVED\"\n\n",inp_buf,out_buf,err_buf);
-    }
-}
-
 void delete_result(){
-    DIR * dp;
-    struct dirent * ep;
-    dp = opendir(dir_name);
-    while(ep = readdir(dp)){
-        char temp[256];
-        strcpy(temp,dir_name);
-        strcat(temp,"/");
-        if(ep->d_type == DT_REG){
-            strcat(temp,ep->d_name);
-            remove(temp);
-        }
+    for(int i = 0; i < test_config.trial; i++){
+        char inp[256];
+        char out[256];
+        char err[256];
+        sprintf(inp,"%s/%d_input",tmp_dir_name,i);
+        sprintf(out,"%s/%d_output",tmp_dir_name,i);
+        sprintf(err,"%s/%d_error",tmp_dir_name,i);
+        remove(inp);
+        remove(out);
+        remove(err);
     }
-    if(rmdir(dir_name) == -1){
+
+    if(rmdir(tmp_dir_name) == -1){
         perror("rmdir failed: ");
         exit(0);
     }
 }
 
 void config_free(run_arg_t* run, input_arg_t* inp){
-    free(run->src_dir);
 
     if(run->src_file_num > 0){
         for(int i = 0; i < run->src_file_num;i++){
@@ -417,89 +461,111 @@ void config_free(run_arg_t* run, input_arg_t* inp){
         free(run->seed_file_name[i]);
     }
 
-    if(run->seed_file_name !=NULL){
-        free(run->seed_file_name);
-    }
-
-    if(run->seed_dir != NULL){
-        free(run->seed_dir);
-    }
-
     if(run->fuzz_type == 1){
         run->args_num += 3;
     }else{
         run->args_num += 2;
     }
-    
+
     for(int i = 0; i < run->args_num; i++){
+
         free(run->cmd_args[i]); 
     }
 
     free(run->cmd_args);
 }
 
-char* seed_read(run_arg_t* run_config,int num,int* length){
-    if(num > run_config->seed_file_num){
-        perror("Wrong seed file number\n");
+char* create_candidate(config_t* config,sched_info_t* sched_info,int* inp_size){
+
+    int seed_idx = choose(config,sched_info);
+
+    char* candidate = (char*)malloc(sizeof(char)*BUFFER_SIZE);
+
+    if(memcpy(candidate,config->run_arg.seed_file_name[seed_idx], config->run_arg.seed_length[seed_idx]) == NULL){
+        perror("seed copy failed\n");
+        exit(1);
     }
 
-    char path[256];
-    sprintf(path,"%s/%s",run_config->seed_dir,run_config->seed_file_name[num]);
+    candidate[config->run_arg.seed_length[seed_idx]-1] = '\0';
 
-    char buf[1024];
-    FILE* fp = fopen(path,"rb");
-    int total_len = 0;
-    int sent = 0;
-    char* seed_input = (char*)malloc(sizeof(char)* 1024);
-    while((sent = fread(buf,sizeof(char),1024,fp)) > 0){
-        if(total_len + sent > 1024){
-           char* check = realloc(seed_input,sizeof(char)*((total_len/1024)+1));
-            if(check == NULL){
-                perror("failed to realloc\n");
-                exit(0);
-            }        
-        }
-        if(memcpy(seed_input + total_len,buf,sent) == NULL){
-            perror("seed_read memcpy failed\n");
-            return NULL;
-        }
-        if(memset(buf,0,1024) == NULL){
-            perror("buf memset failed\n");
-        }
-        total_len += sent;
+    int trial = 1 << rand()%5 + 1;
+    
+    if(strlen(candidate) < trial){
+        trial = strlen(candidate);
     }
-    if(total_len == 0){
-        perror("No seed_input\n");
-        return NULL;
+
+    int length = strlen(candidate);
+
+    char buf[BUFFER_SIZE];
+
+    for(int i = 0; i <trial ; i++){
+       if((length = mutate(candidate,buf,length))<= 0){
+           return candidate;
+       }else{
+           memcpy(candidate,buf,length);
+           candidate[length - 1]='\0';
+       }
     }
-    *length = total_len;
-    return seed_input;
+    *inp_size = length;
+
+    return candidate;
 }
 
-void mutate_inp(char* seed_inp,int seed_length,char* mutate_inp,int * inp_size){
-    *inp_size = mutate(seed_inp,mutate_inp,seed_length);
-    if(*inp_size == -1){
-        perror("mutate failed\n");
+void sellect_candidate(config_t* config,sched_info_t* sched_info,char* inp, int* inp_size,int* seed_idx){
+
+    if(*seed_idx < config->run_arg.seed_file_num){
+
+        *inp_size = config->run_arg.seed_length[*seed_idx];
+
+        if(memcpy(inp,config->run_arg.seed_file_name[*seed_idx],*inp_size) == NULL){
+            
+            perror("seed copy failed\n");
+            exit(1); 
+
+        }
+
+        inp[*inp_size] ='\0';
+
+        *seed_idx = *seed_idx + 1;
+
+    }else{
+
+        char* candidate = create_candidate(config,sched_info,inp_size);
+
+        if(memcpy(inp,candidate,*inp_size) == NULL){
+
+            perror("seed copy failed\n");
+            exit(1); 
+            
+        }
+        
+        inp[*inp_size] ='\0';
+
+        free(candidate);
     }
 }
 
 void fuzzer_main(config_t* config){
     srand(time(NULL));
     fuzzer_init(config);
-    coverage_set_t* cover_set;
+
+    coverage_set_t cover_set;
+
+    sched_info_t sched_info;
+    sched_init(config,&sched_info);
 
     if(test_config.coverage == 1){
-        cover_set = (coverage_set_t*)malloc(sizeof(coverage_set_t));
-        coverage_init(&test_config,cover_set);
+        coverage_init(&test_config,&cover_set);
     }
-    
+
     struct itimerval t;
     time_t start,end;
     signal(SIGALRM,timeout_handler);
 
     //####
-    float** total_coverage = (float**)malloc(sizeof(float*)*test_config.run_arg.src_file_num);
-    float** total_br_coverage = (float**)malloc(sizeof(float*)*test_config.run_arg.src_file_num);
+    float* total_coverage[NUM_OF_MAX];
+    float* total_br_coverage[NUM_OF_MAX];
+
     for(int i = 0; i < test_config.run_arg.src_file_num ; i++){
         total_coverage[i] = (float*)malloc(sizeof(float)*test_config.trial);
         total_br_coverage[i] = (float*)malloc(sizeof(float)*test_config.trial);
@@ -507,112 +573,148 @@ void fuzzer_main(config_t* config){
     //###
 
     start = clock();
-    char* seed_inp;
+
     int seed_idx = 0;
     int length = 0;
+    char random_inp[BUFFER_SIZE];
+
     for(int i = 0; i < test_config.trial ;i++){
+
         //#2 fuzzer_create_input();
-        if(i%(test_config.trial/test_config.run_arg.seed_file_num) == 0){
-            if(seed_idx < test_config.run_arg.seed_file_num){
-                seed_inp = seed_read(&test_config.run_arg,seed_idx,&length);
-                seed_idx++;
-            }
+        sched_info.list_length = test_config.run_arg.seed_file_num;
+
+        memset(random_inp,0,sizeof(char)*BUFFER_SIZE);
+
+        int random_size = 0;
+
+        sellect_candidate(&test_config,&sched_info,random_inp,&random_size,&seed_idx);
+
+
+        if(random_size < 0){
+            perror("random input create failed\n");
+            exit(1);
         }
-        char* random_inp = (char*)malloc(sizeof(char)*(length+2));
-        int random_size = mutate(seed_inp,random_inp,length);
+        
         if(test_config.run_arg.fuzz_type == 1){
-            test_config.run_arg.cmd_args[test_config.run_arg.args_num+1] = random_inp;
+            
+            test_config.run_arg.cmd_args[test_config.run_arg.args_num+1] = (char*)malloc(sizeof(char)*(random_size + 1));
+            
+            if(memcpy(test_config.run_arg.cmd_args[test_config.run_arg.args_num+1],random_inp,random_size) == NULL){
+                
+                perror("argument input memcpy failed\n");
+                exit(1);
+            
+            }
+            test_config.run_arg.cmd_args[test_config.run_arg.args_num+1][random_size] = '\0';
         }
+
         //#3 fuzzer_run();
         int return_code = run(test_config.run_arg,random_inp,random_size,i);
+
         //#4 fuzzer_oracle;
-        config->oracle(dir_name,i,return_code);
+        test_config.oracle(tmp_dir_name,i,return_code);
+
         if(test_config.coverage == 1){
             for(int j = 0; j < test_config.run_arg.src_file_num; j++){
+
                 coverage_gcov(test_config.run_arg.src_file[j],test_config.run_arg.src_dir);
-                read_gcov(cover_set,&test_config,random_inp,random_size,j,i);
+
+                read_gcov(&cover_set,&test_config,random_inp,random_size,j,i);
+
                 reset_gcda(test_config,j);
-                // printf("accumulate\n");
-                int exe_accumulate = 0;
-                int bran_accumulate = 0;
-                for(int k = 0; k <cover_set->code_size[j][1]; k++){
-                    if(cover_set->line_check[j][k] != 0){
-                        exe_accumulate++;
-                    }
-                }
-                for(int k = 0; k <cover_set->code_size[j][2]; k++){
-                    if(cover_set->branch_check[j][k] != 0){
-                        bran_accumulate++;
-                    }
-                }
-                total_coverage[j][i] = ((float)exe_accumulate/(float)cover_set->code_size[j][1])*100;
-                total_br_coverage[j][i] = ((float)bran_accumulate/(float)cover_set->code_size[j][2])*100;
+
+                total_coverage[j][i] = ((float)cover_set.total_excute_line[j]/(float)cover_set.code_size[j][1])*100;
+                total_br_coverage[j][i] = ((float)cover_set.total_excute_branch[j]/(float)cover_set.code_size[j][2])*100;
+
             }
         }
-        print_result(dir_name,i,return_code);
-        free(random_inp);
-    }
 
+        if(return_code == 0){
+            passed++;
+        }else if(return_code > 0){
+            failed++;
+        }else{
+            unresol++;
+        }
+    }
     end = clock();
     double excution = (float)(end-start)/CLOCKS_PER_SEC;
+
     printf("===================result summary=================\n");
     printf("excution time: %f\n",excution);
     printf("running program per sec: %f\n",test_config.trial/excution);
     printf("failed percentage: %f%%\n",(failed/(float)test_config.trial)*100);
-    printf("trial: %d\nPassed: %d\nFailed: %d\nPerfect: %d\n",test_config.trial,passed,failed,no_err);
+    printf("trial: %d\nPassed: %d\nFailed: %d\n",test_config.trial,passed,failed);
     printf("==================================================\n");
     if(test_config.coverage == 1){
-        printf("===================coverage=======================\n");
+        FILE * fp = fopen("result_summary.csv","wb");
+        
+        if(fp == NULL){
+            perror("result file failed\n");
+            exit(1);
+        }
+        
+        fprintf(fp,"Trial,line coverage , branch coverage\n");
         for(int i = 0; i < test_config.trial; i++){
-             printf("Trial[%d] coverage :\n",i+1);
-            for(int j = 0; j < test_config.run_arg.src_file_num; j++){
-                printf("%0.3f%%  %0.3f%%\n",total_coverage[j][i],total_br_coverage[j][i]);
+
+             for(int j = 0; j < test_config.run_arg.src_file_num; j++){
+
+                fprintf(fp,"%d,%0.3f%%,%0.3f%%",i+1,total_coverage[j][i],total_br_coverage[j][i]);
+                if(j + 1 < test_config.run_arg.src_file_num){
+                    fprintf(fp,",");
+                }
             }
-            printf("\n");
+            fprintf(fp,"\n");
+
         }
         float total_line;
         float total_branch;
-        printf("accumulate: \n");
-        for(int j = 0; j <cover_set->src_file_num; j++){
-            total_line = 0;
-            total_branch = 0;
-            for(int k = 0; k < cover_set->code_size[j][1]; k++){
-                if(cover_set->line_check[j][k] == 1){
-                    total_line++;
-                }
-            }
-            for(int k = 0; k < cover_set->code_size[j][2]; k++){
-                if(cover_set->branch_check[j][k] == 1){
-                    total_branch++;
-                }
-            }
-            printf("%0.3f%%  %0.3f%%\n",(total_line*100)/cover_set->code_size[j][1],(total_branch*100)/cover_set->code_size[j][2]);
+        // printf("accumulate: \n");
+        for(int j = 0; j <cover_set.src_file_num; j++){  
+
+            fprintf(fp,"total,%0.3f%%,%0.3f%%\n",(float)(cover_set.total_excute_line[j]*100)/(float)cover_set.code_size[j][1],(float)(cover_set.total_excute_branch[j]*100)/(float)cover_set.code_size[j][2]);
+            
         }
-        printf("==================================================\n");
-        char n_seed[256];
-        for(int j = 0; j < cover_set->branch_length[0]; j++){
-            memset(n_seed,0,sizeof(char)*256);
-            sprintf(n_seed,"%s/%d_new_seed",config->run_arg.seed_dir,j);
+        fclose(fp);
+        // printf("==================================================\n");
+        int seed_dir_length = strlen(test_config.run_arg.seed_dir);
+
+        for(int j = 0; j < cover_set.branch_set.branch_length; j++){
+
+            char* n_seed = (char*)malloc(sizeof(char) *(seed_dir_length + 11));
+
+            sprintf(n_seed,"%s/%d_new_seed",test_config.run_arg.seed_dir,j);
+            // printf("{ %s , %d }\n",cover_set.branch_set.input[j],cover_set.branch_set.line_num[j]);
+            
             int seed_dir = open(n_seed,O_RDWR | O_TRUNC |O_CREAT ,0600);
             int sent = 0;
-            int length = strlen(cover_set->branch_set[j]);
-            while(sent < length){
-                sent += write(seed_dir,cover_set->branch_set[j]+sent,length-sent);
+
+            while(sent < cover_set.branch_set.input_length[j]){
+                sent += write(seed_dir,cover_set.branch_set.input[j]+sent,cover_set.branch_set.input_length[j]-sent);
                 if(sent == -1){
                     perror("add seed failed\n");
                 }
             }
+
             if(close(seed_dir) == -1){
                 perror("close seed file failed\n");
                 exit(1);
             }
+
+            free(n_seed);
+
         }
+
+
         for(int i = 0; i < test_config.run_arg.src_file_num; i++){
             free(total_br_coverage[i]);
             free(total_coverage[i]);
         }
-        coverage_free(cover_set,test_config.run_arg.src_file_num);
+
+        coverage_free(&cover_set,test_config.run_arg.src_file_num);
+
     }
+
     config_free(&test_config.run_arg,&test_config.inp_arg);
     delete_result();
 }

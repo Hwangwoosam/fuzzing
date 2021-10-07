@@ -18,12 +18,17 @@ void init_config(config_t * config){
 
     config->run_arg.timeout = 2;
     config->run_arg.cmd_args = NULL;
-    config->run_arg.seed_dir = NULL;
-    config->run_arg.seed_file_name = NULL;
+    
+    memset(config->run_arg.seed_dir,0,sizeof(char)*PATH_MAX);
+    memset(config->run_arg.src_dir,0,sizeof(char)*PATH_MAX);
+    
+    for(int i = 0; i < NUM_OF_MAX ; i++){
+        config->run_arg.src_file[i] = NULL;
+        config->run_arg.seed_file_name[i] = NULL;
+    }
+    
     config->run_arg.seed_file_num = 0;
     config->run_arg.args_num = 0;
-    config->run_arg.src_dir = NULL;
-    config->run_arg.src_file = NULL;
     config->run_arg.src_file_num = 0;
     config->run_arg.binary_path = NULL;
     config->run_arg.fuzz_type = 0;
