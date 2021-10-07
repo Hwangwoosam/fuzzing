@@ -1,0 +1,244 @@
+        -:    0:Source:cjson_test.c
+        -:    0:Graph:cjson_test.gcno
+        -:    0:Data:cjson_test.gcda
+        -:    0:Runs:1
+        -:    1:#include "../../greybox_mutation_fuzzer/include/cJSON.h"
+        -:    2:
+        -:    3:#include <stdlib.h> 
+        -:    4:#include <stdio.h> 
+        -:    5:#include <string.h> 
+        -:    6:
+        -:    7:#define BUFF_SIZE 4096
+        -:    8:
+function copyItems called 0 returned 0% blocks executed 0%
+    #####:    9:void copyItems(cJSON * json, cJSON * new_json) { 
+        -:   10:    int cJSON_array_size ; 
+    #####:   11:    cJSON * item = json; 
+        -:   12:
+    #####:   13:    if((cJSON_array_size = cJSON_GetArraySize(item)) != 0) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   14:        cJSON * array = cJSON_CreateArray() ; 
+call    0 never executed
+        -:   15:
+        -:   16:        cJSON * ci ; 
+    #####:   17:        for (int i = 0 ; i < cJSON_array_size ; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:   18:            cJSON * new_obj = cJSON_CreateObject() ; 
+call    0 never executed
+    #####:   19:            ci = cJSON_GetArrayItem(item, i) ;
+call    0 never executed
+        -:   20:
+    #####:   21:            if (cJSON_HasObjectItem(item, ci->string)) { 
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   22:                int string_length = strlen(ci->string);  
+    #####:   23:                new_obj->string = (char *)cJSON_malloc(sizeof(char) * string_length);  
+call    0 never executed
+        -:   24:                
+    #####:   25:                memcpy(new_obj->string, ci->string, string_length) ; new_obj->string[string_length] = 0x0 ;   
+    #####:   26:                cJSON_Minify(new_obj->string); 
+call    0 never executed
+    #####:   27:                cJSON * obj_item = cJSON_GetObjectItemCaseSensitive(item, ci->string); 
+call    0 never executed
+        -:   28:                
+    #####:   29:                printf("[item]:%s ", new_obj->string) ; 
+call    0 never executed
+    #####:   30:                if (obj_item != NULL) {
+branch  0 never executed
+branch  1 never executed
+    #####:   31:                    if (cJSON_IsString(obj_item) && obj_item->valuestring != NULL) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+    #####:   32:                        int valuestring_length = strlen(obj_item->valuestring);  
+    #####:   33:                        new_obj->valuestring = (char *)cJSON_malloc(sizeof(char) * valuestring_length) ;
+call    0 never executed
+        -:   34:                        
+    #####:   35:                        memcpy(new_obj->valuestring, ci->valuestring, valuestring_length) ; new_obj->valuestring[valuestring_length] = 0x0 ;   
+        -:   36:                        // cJSON_AddItemToObject(new_obj, new_obj->valuestring, string); 
+    #####:   37:                        printf("[ValueString]: %s, \n", new_obj->valuestring) ; 
+call    0 never executed
+    #####:   38:                    } else if(cJSON_IsNumber(obj_item)) { 
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:   39:                        // cJSON * number = cJSON_CreateNumber(obj_item->valuedouble); 
+        -:   40:                        // double num = cJSON_SetNumberHelper(new_obj, obj_item->valuedouble) ;
+    #####:   41:                        new_obj->valueint = ci->valueint ; 
+    #####:   42:                        new_obj->valuedouble = ci->valuedouble ; 
+        -:   43:
+    #####:   44:                        printf("[value]: %f ", new_obj->valuedouble) ; 
+call    0 never executed
+        -:   45:                    }else {
+    #####:   46:                        printf("\n");
+call    0 never executed
+        -:   47:                    }
+    #####:   48:                    if ( !cJSON_AddItemToArray(array, new_obj) ) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   49:                        printf("Cannot add the new_obj to array!\n"); 
+call    0 never executed
+        -:   50:                    } 
+        -:   51:                }
+        -:   52:            }
+    #####:   53:            copyItems(ci, new_json); 
+call    0 never executed
+        -:   54:        }
+    #####:   55:        if ( !cJSON_AddItemToArray(new_json, array) ) { 
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   56:            printf("Cannot add the array to new_json!\n"); 
+call    0 never executed
+        -:   57:        } 
+        -:   58:    }  
+    #####:   59:}
+        -:   60:
+function main called 1 returned 100% blocks executed 22%
+        1:   61:int main(void) {
+        1:   62:    char * text = (char *)malloc(sizeof(char) * BUFF_SIZE) ; 
+        -:   63:    char c ; 
+        1:   64:    int idx = 0, n = 1 ; 
+        -:   65:    cJSON *json ; 
+        -:   66:    
+        -:   67:    // INPUT 
+      245:   68:    while( (c = getchar()) != EOF) {
+call    0 returned 245
+branch  1 taken 244
+branch  2 taken 1 (fallthrough)
+      244:   69:        if (idx >= BUFF_SIZE) { 
+branch  0 taken 0 (fallthrough)
+branch  1 taken 244
+    #####:   70:            text = (char *)realloc(text, sizeof(char) * BUFF_SIZE * (++n)) ;
+        -:   71:        }
+      244:   72:        text[idx++] = c; 
+        -:   73:    }
+        1:   74:    text[idx] = '\0'; 
+        -:   75:
+        -:   76:    // Parse 
+        1:   77:    json = cJSON_Parse(text) ;
+call    0 returned 1
+        1:   78:    if (!json) {
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:   79:        printf("Error before: [%s]\n",cJSON_GetErrorPtr());
+call    0 returned 1
+call    1 returned 1
+        -:   80:    } else { 
+    #####:   81:        printf("[JSON file structure]\n"); 
+call    0 never executed
+    #####:   82:        printf("%s\n", cJSON_Print(json));
+call    0 never executed
+call    1 never executed
+        -:   83:        
+    #####:   84:        char * copy_text = NULL ; 
+    #####:   85:        cJSON * created_cJSON = cJSON_CreateStringReference(text); 
+call    0 never executed
+        -:   86:
+    #####:   87:        if (!created_cJSON) {
+branch  0 never executed
+branch  1 never executed
+    #####:   88:            printf("Cannot create the cJSON: [%s]\n",cJSON_GetErrorPtr());
+call    0 never executed
+call    1 never executed
+        -:   89:        } else {    
+    #####:   90:            copy_text = (char *)cJSON_malloc(sizeof(char) * idx) ;
+call    0 never executed
+        -:   91:            // If the content of entity is correctly copied to copy_text, true
+    #####:   92:            if (cJSON_PrintPreallocated(json, copy_text, idx , cJSON_True)) { 
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   93:                printf("%s\n", copy_text); 
+call    0 never executed
+        -:   94:
+    #####:   95:                if( !strcmp(text, copy_text)) {
+branch  0 never executed
+branch  1 never executed
+    #####:   96:                    printf("The content of text is same with copy_text!\n"); 
+call    0 never executed
+        -:   97:                }else {
+    #####:   98:                    printf("The content of text is not same with copy_text!\n"); 
+call    0 never executed
+        -:   99:                }
+        -:  100:            }
+    #####:  101:            if ( copy_text != NULL ) free(copy_text); 
+branch  0 never executed
+branch  1 never executed
+        -:  102:
+        -:  103:            // copy the content of object
+    #####:  104:            copyItems(json, created_cJSON) ;
+call    0 never executed
+    #####:  105:            printf("<<< COPY ITEMS >>>\n");
+call    0 never executed
+    #####:  106:            printf("%s\n", cJSON_PrintUnformatted(created_cJSON));
+call    0 never executed
+call    1 never executed
+        -:  107:            
+    #####:  108:            cJSON_free(created_cJSON); 
+call    0 never executed
+        -:  109:        }
+        -:  110:
+        -:  111:        // cJSON Duplicate
+    #####:  112:        cJSON * json_dup = cJSON_Duplicate(json, cJSON_True); 
+call    0 never executed
+        -:  113:
+        -:  114:        // Compare original cJSON to duplicated cJSON. 
+    #####:  115:        if (cJSON_Compare(json, json_dup, cJSON_False)) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  116:            printf("Copy is correct!\n"); 
+call    0 never executed
+        -:  117:        }
+    #####:  118:        cJSON_free(json_dup) ;
+call    0 never executed
+        -:  119:
+        -:  120:        /* Minify a strings, remove blank characters(such as ' ', '\t', '\r', '\n') from strings.*/
+    #####:  121:        cJSON_Minify(text); 
+call    0 never executed
+    #####:  122:        json_dup = cJSON_Parse(text) ; 
+call    0 never executed
+    #####:  123:        if (!json_dup) {
+branch  0 never executed
+branch  1 never executed
+    #####:  124:            printf("Error before: [%s]\n",cJSON_GetErrorPtr());
+call    0 never executed
+call    1 never executed
+        -:  125:        }else {
+    #####:  126:            printf("%s\n", cJSON_PrintUnformatted(json_dup)); ;
+call    0 never executed
+call    1 never executed
+        -:  127:        }
+        -:  128:
+    #####:  129:        if (cJSON_Compare(json, json_dup, cJSON_False)) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  130:            printf("Structure of minified text is same with the structure of original text!\n"); 
+call    0 never executed
+        -:  131:        }else{
+    #####:  132:            printf("Structure of minified text is not same with the structure of original text!\n");
+call    0 never executed
+        -:  133:        }
+        -:  134:        
+        -:  135:        /* Delete a cJSON entity and all subentities. */
+    #####:  136:        cJSON_Delete(json_dup);
+call    0 never executed
+    #####:  137:        cJSON_Delete(json); 
+call    0 never executed
+        -:  138:    }
+        -:  139:    
+        1:  140:    free(text); 
+        -:  141:
+        1:  142:    return 0;
+        -:  143:}
+        -:  144:
+        -:  145:
