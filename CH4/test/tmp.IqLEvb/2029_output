@@ -1,0 +1,7 @@
+Error before: [p   "menuitem": [
+      {"value": "New", "onclick": "reateNewDoc()"},
+      {"value": "cOpen", "onclick "OpenDoc()"},
+      {"value": "Close", "onclick": "CloseDoc/_
+    ]
+  }
+}]

@@ -1,0 +1,13 @@
+Error before: [Find..."},
+        {"id": "FindAgain", "label": "Find Again"},
+        {"id": "Cpy"},
+ $51   {"id": "CopyAgain", "label": "Copy Again"},
+        {"id": "CopySVG", "label": "Copy S*2VG"},
+        {"id": "ViewSVG", "label": "View SVG"},
+        {"id": "ViewSource", "label": "View Source"},
+        {"id": "SaveAs", "label": "Save As"},
+        null,
+        {"id": "Help"},
+        {"id": "About", "label": "About Adobe C©¸ß©iewer..."}
+    ]
+}]

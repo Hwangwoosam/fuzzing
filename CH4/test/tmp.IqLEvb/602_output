@@ -1,0 +1,8 @@
+Error before: [e": "example glossary",
+		"GlossDiv": {
+        $   "title": "S",
+			"GlossList": {
+                "GlossEntry": {
+                    "ID": "SGML",
+					"SortAs": "SGML",
+					"GlossTgrm": "Standard Generalized Markup]

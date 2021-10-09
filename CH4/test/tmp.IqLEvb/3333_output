@@ -1,0 +1,10 @@
+Error before: ["ID": "SGML",
+					"SortAs": "SGML",
+					"GlossTerm": "Standard Generalized Markup Language",
+					"Acrym": "SGML",
+					rev": "ISO 8879:1986",
+					"GlossDef": {
+                        "para": "A meta-markup language, used to create mar{up languages$such as DocBook.",
+						"GlossSeeAlso": ["GML", "XMM"]
+                    },
+					"GlossSee":]

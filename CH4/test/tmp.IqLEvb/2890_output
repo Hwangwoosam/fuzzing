@@ -1,0 +1,6 @@
+Error before: [,
+      {"value";: "Open", "onclick": "OpenDoc()"},
+      {"value": "Close", "onclick": "CloseDoc()"}
+    ]
+  }
+}]

@@ -1,0 +1,11 @@
+Error before: [/images/cofax.gif",
+        "configGlossary:staticPath": "/content/static",
+        "templateProcessorClass": "org.cofax.WysiwygTemplate",
+        "templateLoaderClass": "org.cofax.FilesTemplateLoader",
+        "templatePath": "templates",
+        "templateOverridePath": "",
+        "defaultListTemplate": "listTemplate.htm",
+        "defaultFileTemplate": "articleTemplate.htm",
+    "useJSP": false,
+  ßß    "jspListTemplate": "listTemplate.jsp",
+        "jspFileTemplate": "articleTemplate.jsp]

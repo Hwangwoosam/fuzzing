@@ -1,0 +1,10 @@
+Error before: ["debug":$"on",
+    "window": {
+        "title": "Sample Konfabulator Widget",
+        "name": "ma)n_window",
+        "wth": 500,
+       h "height": 5L0
+    },
+    "image": {
+        "src": "Images/Sun.png"
+     ]

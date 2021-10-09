@@ -1,0 +1,9 @@
+[JSON file structure]
+"name"
+"name"
+The content of text is not same with copy_text!
+<<< COPY ITEMS >>>
+"\"name\": \"Jack (\\\"Bee\") Nimr\n\"fom {\"type\":   d    \"rect\",\n\"width\":      1920,\n\"heht\":  ?\u0017\u0011\u0006   1080,\n\""
+Copy is correct!
+"name"
+Structure of minified text is same with the structure of original text!

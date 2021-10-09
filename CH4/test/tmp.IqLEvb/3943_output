@@ -1,0 +1,9 @@
+[JSON file structure]
+"flossary"
+"flossary"
+The content of text is not same with copy_text!
+<<< COPY ITEMS >>>
+"\n    \"flossary\": {\n        \"title\": \"example glossary\",\n\t\t\"GlossDiv\": {\n            \"title\"Εί\"S\",\n\t\t\t\"GlossList\": {\n             @"
+Copy is correct!
+"flossary"
+Structure of minified text is same with the structure of original text!

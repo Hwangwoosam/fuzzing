@@ -1,0 +1,9 @@
+Error before: [#,
+      "init-param": {
+        "configGlossay:installationAt": "Philadelphia, PA",
+        "configlossary:adminEmail": "ksm@pobox.com",
+        "doconfigGlossary:poweredBy": "Cofax",
+        "configGlossary:poweredByIcon": "/images/cofax.gif",
+        "configGlossary:staticPath": "/contstatic",
+        "templateProcessorClass": "org.cofax.WysiwygTemplate",
+        "templateLoa]

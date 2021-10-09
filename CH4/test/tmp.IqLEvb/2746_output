@@ -1,0 +1,19 @@
+Error before: [,
+		"GlossDiv": {
+          itle": 
+			"Glossist": {
+                "GlossEntry": {
+                    "ID": "SML",
+					"StAs": "SGML",*					"GlossTerm": "Standard Generalized Markup Language",
+				öÝ¾œronqm": "SGML",
+					"Abbrev": "ISO 8879:1986",
+			lossDef": {
+                        "para": "A meta-markup lagnguage, used to creatIe markup languages 3uch as$DocBook."
+						"GlossSeeAlsom&": ["GML","XML"]
+                    },
+					"GlossSee": "markup"
+                }
+            }
+        }
+    }
+]

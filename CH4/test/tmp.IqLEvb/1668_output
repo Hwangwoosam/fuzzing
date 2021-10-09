@@ -1,0 +1,20 @@
+Error before: [los": {
+        "titlx/e": "example glossary",
+		"GlossDiv": {
+            "title": "S",		"GlossList": {
+                "GìêååEntry": {
+                    "ID": "SGML",
+					"SortAs": "SGML",
+					"GlossTerm": "Standard Generalized Markup Language",
+					"Acronym": "SGML",
+				"Abbrev": "ISd O 8879:1986",
+					"GlossDef": {
+                        "para": "A meta-markup language, used to create markup languag such aåﬂDocBook.",
+						"GlossSeeAlso": ["GML", "]
+                    },
+					"GlossSe^": "markup"
+               
+            }
+   0    }
+    }
+]

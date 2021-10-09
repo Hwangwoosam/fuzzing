@@ -1,0 +1,9 @@
+[JSON file structure]
+-84
+-84
+The content of text is not same with copy_text!
+<<< COPY ITEMS >>>
+"-84\u0015%\u0001*\u001d#\f\"& '"
+Copy is correct!
+-84
+Structure of minified text is same with the structure of original text!

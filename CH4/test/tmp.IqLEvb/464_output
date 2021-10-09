@@ -1,0 +1,9 @@
+[JSON file structure]
+"men:0{\n  "
+"men:0{\n  "
+The content of text is not same with copy_text!
+<<< COPY ITEMS >>>
+"\"men:0{\n  \"i$\": \"file"
+Copy is correct!
+"men:0{\n  "
+Structure of minified text is same with the structure of original text!

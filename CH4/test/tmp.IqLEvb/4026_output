@@ -1,0 +1,9 @@
+Error before: [opySVG", "label": "Copy SVG"},
+        {"id": "ViewSVG", "label": "View SVG"},
+        {"id": "ViewSource", "label": "View Source"},
+        {"id": "SaveAs", "label": "Save As"},
+        null,
+        {"id": "Help"},
+        {"i: "About", "label": "About Adobe CVG Viewer..."}
+    ]
+}]

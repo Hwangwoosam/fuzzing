@@ -1,0 +1,12 @@
+Error before: [Y	 "precision": "zip",
+	 "Latitude":  37.7668,
+	 "Longitude": -122.3959,
+	 "Address":   "",
+	 "City":      "SAN FRANCISCO",
+	 "State":     "CA",
+	 "Zip":       "94107",
+	 "Country":   "US"
+	 },
+	 {
+	 "precision": "zip",
+	 "Latitude":  37.€]

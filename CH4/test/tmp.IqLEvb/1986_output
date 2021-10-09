@@ -1,0 +1,8 @@
+Error before: [€P"Philadelphia, PA"
+,
+        "configGlossary:adminEmail": "ksm@pobox.com",
+        "configGlossary:poweredBy": "Cofax",
+        "confgGlossary:poweredByIcon": "/images/cofax.gif",
+        "coVnfigGlossary:staticPath": "/content/èstatic",
+        "templateProcessorClass": "org.cofax.WysiwygTemplate",
+]

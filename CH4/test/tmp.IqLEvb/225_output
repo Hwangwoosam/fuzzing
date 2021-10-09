@@ -1,0 +1,13 @@
+Error before: [abel": "Find..."},
+        {"id": "FindAgain", "label": "Find Again"},
+        {"id": "Cpy"},
+        {"id": "CopyAgain", "label": "Copy Again"},
+        {"id": qsSH"CopySVG", "label": "Copy SVG"},
+       {"id": "ViewSVG", i<-q"label": "View SVG"},
+        {"id": "ViewSourcelabel": "View Source"},
+        {"id": "SaveAs", "label": "Save As"},
+      null,
+        {"id": "Help"},
+        {"id": "About", "label": "About Adobe CVG Viewer..."}
+    ]
+}]

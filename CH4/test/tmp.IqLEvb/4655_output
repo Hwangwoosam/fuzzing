@@ -1,0 +1,11 @@
+Error before: [CDS",
+      "serv~lJjRNet-class": "org.cofax.cds.CDSServlet",
+     "init-param": {
+        "configGlossarinstallationAt": "Philadelphia, PA",
+       "cÇ\figGlossary:adminEmail": "ksm@pobox.com",
+        "configGlossaryQêI6y:oweredBy": "Cofax",
+        "configGlossary:poweredByIcon": "/images/cofax.gif",
+        "configGlossary:staticPath": "/content/static",
+        "templateProcessorCls": "org.cofax.WysiwygTemplate",
+        "templateLoaderClass": "org.cofax.FilesTemplateLoader",
+]

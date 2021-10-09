@@ -1,0 +1,3 @@
+Error before: [[
+      {"value": "New", nclick": "CreateNewDoc()"},
+  0>   *{"value": "Open", "onclicQk": "OpenDoc()"},]

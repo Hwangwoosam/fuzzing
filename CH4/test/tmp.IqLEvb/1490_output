@@ -1,0 +1,9 @@
+[JSON file structure]
+6
+6
+The content of text is not same with copy_text!
+<<< COPY ITEMS >>>
+"6t{\"menu\": {\n    \"heuder\": \"SVG Viewer\",\n items\": [\n        {\"id\": \"Open\"},\n           {\"id\": \"OpenNew\", \"label\": \"Open New\"},\n        null,\n        {\"id\""
+Copy is correct!
+6
+Structure of minified text is same with the structure of original text!

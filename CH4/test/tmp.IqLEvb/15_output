@@ -1,0 +1,35 @@
+[JSON file structure]
+{
+	"menu":	{
+		"id":	"file",
+		"value":	"File",
+		"popup":	{
+			"menuitem":	[{
+					"value":	"New",
+					"onclick":	"CreateNewDoc()"
+				}, {
+					"value":	"Open",
+					"onclick":	"OpenDoc()"
+				}, {
+					"value":	"Close",
+					"onclick":	"CloseDoc()"
+				}]
+		}
+	}
+}
+[item]:menu 
+[item]:id [ValueString]: file, 
+[item]:value [ValueString]: File, 
+[item]:popup 
+[item]:menuitem 
+[item]:value [ValueString]: New, 
+[item]:onclick [ValueString]: CreateNewDoc(), 
+[item]:value [ValueString]: Open, 
+[item]:onclick [ValueString]: OpenDoc(), 
+[item]:value [ValueString]: Close, 
+[item]:onclick [ValueString]: CloseDoc(), 
+<<< COPY ITEMS >>>
+"{\"menu\": {\n  \"id\": \"file\",\n  \"value\": \"File\",\n  \"popup\": {\n    \"menuitem\": [\n      {\"value\": \"New\", \"onclick\": \"CreateNewDoc()\"},\n      {\"value\": \"Open\", \"onclick\": \"OpenDoc()\"},\n      {\"value\": \"Close\", \"onclick\": \"CloseDoc()\"}\n    ]\n  }\n}}\n"
+Copy is correct!
+{"menu":{"id":"file","value":"File","popup":{"menuitem":[{"value":"New","onclick":"CreateNewDoc()"},{"value":"Open","onclick":"OpenDoc()"},{"value":"Close","onclick":"CloseDoc()"}]}}}
+Structure of minified text is same with the structure of original text!

@@ -1,0 +1,7 @@
+Error before: [  "menuitem": [
+      {"value": "New", "on#lick": "CreateNewDoc()"},
+      {"value": "Open", "onclick"< "OpenDoc()"},
+      {"value: "Cl2'ose", "onclick": "CloyPorseDoc()"}
+    ]
+  }
+}]

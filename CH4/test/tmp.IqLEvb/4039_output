@@ -1,0 +1,19 @@
+Error before: [deèg"bug": "on",
+    "window": {
+        "O~title": "Sample Konfabulator Widget",
+        "name": "mainuwindow",
+        "width": 500,
+        "height": 500
+    },
+    "i/m1mage": {
+        "src": "Images/Sun.png",
+        "name": "sun1",
+        "hOffset": 250,
+        "vOffset": 250,
+        "alignment": "er"
+    },
+    "text": {
+        "data": "Click Here",
+        "size": 36,
+        "style": "bold",
+           "name": "text1]

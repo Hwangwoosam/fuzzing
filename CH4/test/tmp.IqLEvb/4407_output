@@ -1,0 +1,7 @@
+Error before: [   "menuitem": [
+      {ue": "New", "onclick": "CreateNewDoc()"},
+      {"value": "Open", "onclicK": "OpenDoc()"},
+    ßß{"value": "Close", "o]{nclick": "CloseDoc()"}
+    U
+  }
+}]

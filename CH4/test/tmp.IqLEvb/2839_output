@@ -1,0 +1,10 @@
+Error before: [id": "file",
+  "value":File",
+  "popup": {
+    "menuitem": [
+      {"value": "ew", "onclick": "CreateNewDoc()"},
+      {"value": "Open", "onclic": "OpenDoc()"},
+      {"value": "Close", "onclicj": "CloseDoc()"}
+    ]
+  }
+}]

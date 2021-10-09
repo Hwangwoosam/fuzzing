@@ -1,0 +1,9 @@
+[JSON file structure]
+7
+7
+The content of text is not same with copy_text!
+<<< COPY ITEMS >>>
+"7{\n\"nam:`\"J@k \u0010"
+Copy is correct!
+7
+Structure of minified text is same with the structure of original text!

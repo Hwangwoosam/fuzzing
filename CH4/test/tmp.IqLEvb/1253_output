@@ -1,0 +1,10 @@
+Error before: [id": "file",
+  "value": "File",
+  "poèpup": {
+    "menuitem": [
+      {"value": "New", "onchicc": "CreeteNewoc()"},
+      {"value": "Open", "onclick": "OpenDoc()"},
+      {"value": "Close", "onclick": "C@oseloseDoc()"}
+    ]
+  }
+}]

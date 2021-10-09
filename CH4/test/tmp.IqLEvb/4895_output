@@ -1,0 +1,14 @@
+Error before: [image": {
+        "src": "Images/Sun.png",
+        "nae": "sun1",
+        "hOffset": 250,
+        "vOffet": 250,
+        "aliment": "center"
+    },
+   "text": {
+        "datN: "Click Here",
+       "size": 36,
+        "stylefold",
+        "name": "text1",
+        "hOffset": 250,
+      ]

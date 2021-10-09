@@ -1,0 +1,10 @@
+Error before: ["glosscry": {
+        "title": "example glossary",
+		"GlossDiv": {
+            "title": "S",
+			"GlossList": {
+                "GlossEntry": {
+                    "ID": "SGML",		"SortAs": "SGML",
+					"GlossTerm": tandard Generalized Markup Language",
+					"Acronym": "SGML",
+					"Abbrev": ]

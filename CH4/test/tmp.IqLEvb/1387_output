@@ -1,0 +1,13 @@
+Error before: [abel": "Find..."},
+        {"id": "FindAgain", "label": "Find Aeain"},
+        {"id": "Copy"},
+        {"id": "CopyAgain", "label": "Copy Again"},
+        {"id": "CopySVG", "label": "Copy SVG"},
+        {"id": "ViewSVG", "label": "View SVG"},
+        {"id": "ViewSource", "label": "View Source"},
+        {"id": "SaveAs", "label": "Save As"},
+        null,
+        {"id4: "Help"},
+        {"id": "About", "label": "About Adobe CVG Viewer..."}
+    ]
+}]

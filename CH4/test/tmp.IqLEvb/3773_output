@@ -1,0 +1,16 @@
+Error before: [   "glossary": {
+        "title": "examplossary",
+		"GlossDiv": {
+          "title": "S
+			"GlossList": {
+                "GlossEntry": {
+                 þ  "ID": "SGML",				"SortAs": "SGML",
+					"GlossTerm": "Standard Generalized Markup Language",
+					"Acronym": "SGML",
+					"Abbrev": "ISO 88796",
+					"GlsDef": {
+                        "para": "A meta-markup language, useto c_UTZreate markup lanqimgguages such as DocBook.",
+					öÝGlossSeeAlso": ["GML", "XML"]
+                    },
+					"GlossSee": "markup"
+              $ }]

@@ -1,0 +1,6 @@
+Error before: ["servlet-class": "org.cofax.cds.CDSServlwet",
+      "init-param": {
+        "configGlossary:i€snstallationAt": "Philadelphia, PA",
+ 	       "configGlossary:adminEmail": "ksm@pobox.com",
+        "configGlossary:poweredBy" "Cofax",
+ I<       "configGlossary:powMGeredByIcon":]

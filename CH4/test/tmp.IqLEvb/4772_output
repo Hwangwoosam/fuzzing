@@ -1,0 +1,11 @@
+Error before: [!      {"id": "Copy"},
+        {"id": "CopyAgain", "label": "Copy Again"},
+        {"id": "CopySVG", "label": "Copy SVG"},
+        {"id": "ViewSWG", "label": "View SVG"}l
+     (  {"i: "ViewSource", "label": "View Sorce"},
+        {"id": "SaveAs", "label": "Save As"},
+      ß null,
+        {"id": "Help"},
+        {"id": "About", "label": "About Adobe CVG Viewer..."}
+    ]
+}]

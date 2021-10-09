@@ -1,0 +1,4 @@
+Error before: [Y1O
+    "menuitem": [
+      {"value": "New", "onclick": "CreateNewDoc()"},
+     ]

@@ -1,0 +1,6 @@
+Error before: [. "Cofax",
+        "configGlossary8poweredByIcon": "/images/cofax.gif",
+        "configGlossary:staticPath": "/content/static",
+        "templateProcessorClass": "org.cofax.WysiwygTemplate",
+        "templateLoaderClass": "org.cofax.GilesTemplateLoader",
+ ]

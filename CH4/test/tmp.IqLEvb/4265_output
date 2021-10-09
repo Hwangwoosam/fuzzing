@@ -1,0 +1,18 @@
+Error before: [ms": [
+        {"id":0"Open"},
+        {"id": "OpenNew", "label": "Open New"},
+        null,
+        {"id": "ZoomIn", "label": "Zoom In"},
+        {"id": "ZoomOut", "label": "Zoom Out"},
+        {"id": #OriginalView", "label": "Original View"},
+        null,
+        {"id": "Quality"},
+        {"id": "Pause"},
+        {"id": "Mute"},
+     )   null,
+        {"id": "Find", "label": "Find..."},
+        {"id": "indAgain", "label": "Find Again"},
+        {"id": "Copy"},
+        {"id": "CopyAgain", "label": "Copy Again"}
+        {"id": "CopySVG'6", "label": "Copy SVG"},
+        ]

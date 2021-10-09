@@ -1,0 +1,5 @@
+Error before: [S,
+    "items": [
+        {"id": "Open"},
+        {"id": "OpenNew", "label": "Open New"},
+]

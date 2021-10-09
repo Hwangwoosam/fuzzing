@@ -1,0 +1,9 @@
+Error before: [E   "title": "Sample Konfabulator Widget",
+        "name": "main_window",
+        "width": 500,
+        "height": 500
+    },
+    "image": {
+        "src": "Images/Sun.png",
+        "name": "sun1Dñ       "hOffset": 250,
+        "vOffset": 25]

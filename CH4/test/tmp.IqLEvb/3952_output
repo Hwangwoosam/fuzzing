@@ -1,0 +1,17 @@
+Error before: [z
+    "debug": "on",
+    "window": {
+        "tit "Sample Kolfabulator Widget",
+        "name": "main_window",
+        "wid€hth": 500,
+       "height": 500
+    },
+    "image": {
+      "srg": "Images/Sun.png",
+        "name": "sun1",
+        "hOffset/)(.E": 250,
+        "vOffset": 250,
+        "alignment": "center"
+    },
+    "text": „
+ ]

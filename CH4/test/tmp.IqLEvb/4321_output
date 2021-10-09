@@ -1,0 +1,19 @@
+Error before: [ﬂ œœ
+    },
+    "ace": {
+        "src": "Images/Sun.png",
+;      name": "sun1",
+        "hOffset": 250,
+        "vOffset": 250,
+        "alignmt": "center"
+    },
+    "text": {
+        "Ztta": "Click Herö,
+        "size": 36,
+        "style": "bold",     "name": "text1",
+        "hOffset": 250,
+        "vOffset": 100,
+        "alignment": "center",
+*6    "onMouseUp": "sun1.opacity = (sun1.opacity / 100) * 90;"
+    }
+}} ]

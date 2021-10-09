@@ -1,0 +1,9 @@
+[JSON file structure]
+[-1, 0]
+[-1, 0]
+The content of text is not same with copy_text!
+<<< COPY ITEMS >>>
+"[\n    -1, 0],\n    [1, 0, 0],\n    [œ”ﬂœ, 1]\n\t"
+Copy is correct!
+[-1,0]
+Structure of minified text is same with the structure of original text!

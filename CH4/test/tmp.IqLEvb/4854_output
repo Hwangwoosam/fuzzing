@@ -1,0 +1,9 @@
+Error before: [= "cCDS",
+      "servlet-class": "org.ctofax.cds.CDSServlet",
+      "init-param": {
+        "configGlossary:installationAt": "Philadelphia, PA",
+       "c‚\figGlossary:adminEmail": "ksm@pobox.com",
+        "configGlossary:poweredBy": "Cofax",
+     configossary::~`NpoweredByIcon": "/images/cofax.gif",
+        "configGlossary:staticPath": "/content/statiwlc",
+]

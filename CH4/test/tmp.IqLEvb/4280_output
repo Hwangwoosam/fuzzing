@@ -1,0 +1,5 @@
+Error before: ["cCDS",
+      "srvlet-class": "org.cofax.cds.CDServlet",
+      "init-param": {
+        "configGlossary:installationAt": "Philadelphia, PA",
+     ]

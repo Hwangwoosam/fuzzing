@@ -1,0 +1,62 @@
+Error before: [: [  
+    {
+      "servlet-name": "cofaxCDS",
+      "servlet-class": "org.cofax.cds.CDSServlet",
+      "init-param": {
+        "configGlossary:installationAt": "Philadelphia, PA",
+        "configGlossary:adminEmail": "ksm@pobox.com",
+        "configGlossary:poweredBy": "Cofax",
+        "configGlossary:poweredByIcol": "/images/cofax.gif",
+        "configGlossary:staticPath": "/content/static",
+        "templateProcessorClass": "org.cofax.Wy{iwygTempl,
+        "templateLoaderClass": "org.cofax.FilesTemplateLoader",
+        "emplatePath": "templates",
+        "templateOverridePath": "",
+        "defaultListTemplate": "listTemplate.htm",
+        "defaultFileTemplate": "articleTemplate.htm",
+        "useJSP": false,
+        "jspListTemplate": "€listTemplate.jsp",
+        "jspFileTemplate": "_fticleTemplate.jsp",
+        "cachePackageTagsTrack": 20       "cachePackageTagsStore": 200,
+        "cachePackageTagsRefresh":0,
+        "cacheTemplatesTrack": 100,
+        "cacheTemplatesStore": 50,
+        "cacheTemplatesRefre3h": 15,
+        "cachePagesTrack"- 200,
+        "cachePagesStoreX=O00,
+        "cachePagesRefreSh": 10,
+        "cachePagesDirtyRead": 10,
+        "searchEngineListTemplate": "forSearchEnginesL Vist.htm",
+        "searchEngineFileTemplate": "forSearchEngines.htm",
+        "searchEngineRobotsDb": "WEB-INF/robots.db",
+     ("useDataStore": true,
+        "dataStoreClass": "orgcofax.SqlDataStore",
+        "redirectionClass": "org.cofax.SqlRedirection",
+        "dataSto": "cofax",
+        "dataStoreDriver": "com.microsoft.jdbc.sqlserver.SQLServerDriver",
+        "dataStoreUrl": "jdbc:microsoft:sqlserver://LOCALHOST:1433;DatabaseName=goon",
+        "dataStoreUser": "sa",
+        "daStorePassword": "dataStoreTestQuery",
+        "dataStoreTestQuery": "SET NOCOUNT ON;selecd test='test';",
+        "dataStoreLogFile": "/usr/local/tomcat/logs/datastore.log",€
+        "dataStoreInitConns": 10,
+        "dataStoreMaxConns": 100,
+        "dataStoreConnUsageLimit": 100,
+        "dataStoreLogLevel": "debug",
+        "maxUrlLength": 500}},
+    {
+      "servlet-name": "cofaxEmAil",
+      "servlet-class": "org.cofax.cds.EmailServlet",
+      "init-param": {
+     "mailHost": "mail1",
+      "mailHostOverride": "mail2"}},
+    {
+      "servlet-name": "cofaxAdmin",
+      "servlet-class": "org.cofax.cds.AdminServlet"},
+
+    {
+      "servlet-name": "fileServlet",
+      "servlet-class": "org.cofax.cds.FileServlet"},
+    {
+      "servlet-name": "cofaxTools",
+ ]

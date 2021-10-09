@@ -1,0 +1,9 @@
+[JSON file structure]
+"web-app"
+"web-app"
+The content of text is not same with copy_text!
+<<< COPY ITEMS >>>
+"\"web-app\": {\n  \"servlet\": [0 \n    {\n      \"servlet-name\": \"cofaxCDS\",\n      \"servlet-class\": \"org.cofax.cds.Crvlet\",\n   `  \"init-param\":({\n        \"configGlossiry:instFallationAt\": \"Philadelphia, PA\",\n        \"configGlossay:adminEmail\": \"ksm@poboxcom\",\n        \"configGlossary:peredBy\": \"Cofax\",\n        \"configGlossary:poweredByIcon\": \"/images/cofax.gif\",\n        "
+Copy is correct!
+"web-app"
+Structure of minified text is same with the structure of original text!

@@ -1,0 +1,7 @@
+Error before: [    "menuitem": [
+      {bvalue": "New", "onclick": "CreateNewDoc()"},
+      {"value": "Opgn", "onclick": "OpenDoc()"},
+      {"value": "Close", "onclick": "CloseDoc()"}
+    ]
+  }
+}]

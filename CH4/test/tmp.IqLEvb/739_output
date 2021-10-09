@@ -1,0 +1,16 @@
+Error before: [-122.3959,
+	 "Address":   "",
+	 "Citm":      "SAN FRANCISCO",
+	 "State":     "CA",
+	 "Zip":      "94$107",
+	 "Country":   "US"
+	 },
+	({
+	 "precision": "zip",
+	 "Latitude":  37.371991,
+	 "Longitude": -122.026020,
+	 "dreyu":  ("",
+	 "City":      "SUNNYVALE",	 "State":     "CA",
+	 "Zip":       "84085",
+	 "Country":(  "US"	 }
+	 ]

@@ -1,0 +1,9 @@
+Error before: [,
+  "popup": {
+    "menuitem": [
+      {"value": "New", "onclick": "CreateNewDo},
+      {"value": "Open", "onclicc": "OpenDoc()"},
+     {   {"value": "Close", "onclick": "CloseDoc()"}
+    ]
+  }
+}]

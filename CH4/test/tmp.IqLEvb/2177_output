@@ -1,0 +1,12 @@
+Error before: [  "window": {
+        "title": "Sample Konfabulator Widget",
+        "name": "main_window",
+        "width": 500,
+        "height": 500
+    },
+;r    "image":<‡
+       "src": "Images/Sun.pnFg",
+        "name": "sun1",
+        "hOffset": 250,
+        "vOffset": 250,
+   ]

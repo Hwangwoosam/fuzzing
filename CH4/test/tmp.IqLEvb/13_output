@@ -1,0 +1,31 @@
+[JSON file structure]
+{
+	"name":	"Jack (\"Bee\") Nimble",
+	"format":	{
+		"type":	"rect",
+		"width":	1920,
+		"height":	1080,
+		"interlace":	false,
+		"frame rate":	24
+	}
+}
+{
+	"name":	"Jack (\"Bee\") Nimble",
+	"format":	{
+		"type":	"rect",
+		"width":	1920,
+		"height":	1080,
+		"interlace":	false,
+		"frame rate":	24
+	}
+}
+The content of text is not same with copy_text!
+[item]:name [ValueString]: Jack ("Bee") Nimble, 
+[item]:format 
+[item]:type [ValueString]: rect, 
+[item]:width [value]: 1920.000000 [item]:height [value]: 1080.000000 [item]:interlace 
+[item]:framerate [value]: 24.000000 <<< COPY ITEMS >>>
+"{\n\"name\": \"Jack (\\\"Bee\\\") Nimble\",\n\"format\": {\"type\":       \"rect\",\n\"width\":      1920,\n\"height\":     1080,\n\"interlace\":  false,\"frame rate\": 24\n}\n}\n"
+Copy is correct!
+{"name":"Jack (\"Bee\") Nimble","format":{"type":"rect","width":1920,"height":1080,"interlace":false,"frame rate":24}}
+Structure of minified text is same with the structure of original text!
