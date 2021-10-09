@@ -21,7 +21,11 @@ typedef struct run_arg{
     
     char src_dir[PATH_MAX];
     char seed_dir[PATH_MAX];
+<<<<<<< HEAD
     char* seed_inp[NUM_OF_MAX];
+=======
+    char* seed_file_name[NUM_OF_MAX];
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
     int seed_length[NUM_OF_MAX];
     char** cmd_args;
     

@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+<<<<<<< HEAD
 #include <sys/time.h>
 #include <time.h>
+=======
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
 #include "../greybox_mutation_fuzzer/include/fuzzer.h"
 #include "../greybox_mutation_fuzzer/include/coverage.h"
 #include "../greybox_mutation_fuzzer/include/config.h"
@@ -42,6 +45,7 @@ void set_configs(config_t* config){
 int main(){
     config_t temp ;
     coverage_set_t cover_set;
+<<<<<<< HEAD
     time_t start,end;
     init_config(&temp);
     set_configs(&temp);
@@ -53,4 +57,9 @@ int main(){
     end = clock();
     double excution = (float)(end-start)/CLOCKS_PER_SEC;
     printf("excution time: %f\n",excution);
+=======
+    init_config(&temp);
+    set_configs(&temp);
+    fuzzer_main(&temp);
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
 }

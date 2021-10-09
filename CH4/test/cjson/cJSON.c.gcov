@@ -280,6 +280,7 @@ branch  3 never executed
         -:  238:}
         -:  239:
         -:  240:/* Internal constructor. */
+<<<<<<< HEAD
 function cJSON_New_Item called 1 returned 100% blocks executed 100%
         1:  241:static cJSON *cJSON_New_Item(const internal_hooks * const hooks)
         -:  242:{
@@ -310,10 +311,43 @@ branch  0 taken 1 (fallthrough)
 branch  1 taken 0
 branch  2 taken 0 (fallthrough)
 branch  3 taken 1
+=======
+function cJSON_New_Item called 5 returned 100% blocks executed 100%
+        5:  241:static cJSON *cJSON_New_Item(const internal_hooks * const hooks)
+        -:  242:{
+        5:  243:    cJSON* node = (cJSON*)hooks->allocate(sizeof(cJSON));
+call    0 returned 5
+        5:  244:    if (node)
+branch  0 taken 5 (fallthrough)
+branch  1 taken 0
+        -:  245:    {
+        5:  246:        memset(node, '\0', sizeof(cJSON));
+        -:  247:    }
+        -:  248:
+        5:  249:    return node;
+        -:  250:}
+        -:  251:
+        -:  252:/* Delete a cJSON structure. */
+function cJSON_Delete called 3 returned 100% blocks executed 93%
+        3:  253:CJSON_PUBLIC(void) cJSON_Delete(cJSON *item)
+        -:  254:{
+        3:  255:    cJSON *next = NULL;
+        8:  256:    while (item != NULL)
+branch  0 taken 5
+branch  1 taken 3 (fallthrough)
+        -:  257:    {
+        5:  258:        next = item->next;
+        5:  259:        if (!(item->type & cJSON_IsReference) && (item->child != NULL))
+branch  0 taken 5 (fallthrough)
+branch  1 taken 0
+branch  2 taken 0 (fallthrough)
+branch  3 taken 5
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -:  260:        {
     #####:  261:            cJSON_Delete(item->child);
 call    0 never executed
         -:  262:        }
+<<<<<<< HEAD
         1:  263:        if (!(item->type & cJSON_IsReference) && (item->valuestring != NULL))
 branch  0 taken 1 (fallthrough)
 branch  1 taken 0
@@ -337,6 +371,31 @@ call    0 returned 1
         1:  272:        item = next;
         -:  273:    }
         1:  274:}
+=======
+        5:  263:        if (!(item->type & cJSON_IsReference) && (item->valuestring != NULL))
+branch  0 taken 5 (fallthrough)
+branch  1 taken 0
+branch  2 taken 2 (fallthrough)
+branch  3 taken 3
+        -:  264:        {
+        2:  265:            global_hooks.deallocate(item->valuestring);
+call    0 returned 2
+        -:  266:        }
+        5:  267:        if (!(item->type & cJSON_StringIsConst) && (item->string != NULL))
+branch  0 taken 5 (fallthrough)
+branch  1 taken 0
+branch  2 taken 4 (fallthrough)
+branch  3 taken 1
+        -:  268:        {
+        4:  269:            global_hooks.deallocate(item->string);
+call    0 returned 4
+        -:  270:        }
+        5:  271:        global_hooks.deallocate(item);
+call    0 returned 5
+        5:  272:        item = next;
+        -:  273:    }
+        3:  274:}
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -:  275:
         -:  276:/* get the decimal point character of the current locale */
 function get_decimal_point called 0 returned 0% blocks executed 0%
@@ -986,6 +1045,7 @@ branch  1 never executed
         -:  766:}
         -:  767:
         -:  768:/* Parse the input text into an unescaped cinput, and populate item. */
+<<<<<<< HEAD
 function parse_string called 0 returned 0% blocks executed 0%
     #####:  769:static cJSON_bool parse_string(cJSON * const item, parse_buffer * const input_buffer)
         -:  770:{
@@ -998,12 +1058,27 @@ function parse_string called 0 returned 0% blocks executed 0%
     #####:  777:    if (buffer_at_offset(input_buffer)[0] != '\"')
 branch  0 never executed
 branch  1 never executed
+=======
+function parse_string called 6 returned 100% blocks executed 40%
+        6:  769:static cJSON_bool parse_string(cJSON * const item, parse_buffer * const input_buffer)
+        -:  770:{
+        6:  771:    const unsigned char *input_pointer = buffer_at_offset(input_buffer) + 1;
+        6:  772:    const unsigned char *input_end = buffer_at_offset(input_buffer) + 1;
+        6:  773:    unsigned char *output_pointer = NULL;
+        6:  774:    unsigned char *output = NULL;
+        -:  775:
+        -:  776:    /* not a string */
+        6:  777:    if (buffer_at_offset(input_buffer)[0] != '\"')
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -:  778:    {
     #####:  779:        goto fail;
         -:  780:    }
         -:  781:
         -:  782:    {
         -:  783:        /* calculate approximate size of the output (overestimate) */
+<<<<<<< HEAD
     #####:  784:        size_t allocation_length = 0;
     #####:  785:        size_t skipped_bytes = 0;
     #####:  786:        while (((size_t)(input_end - input_buffer->content) < input_buffer->length) && (*input_end != '\"'))
@@ -1016,6 +1091,20 @@ branch  3 never executed
     #####:  789:            if (input_end[0] == '\\')
 branch  0 never executed
 branch  1 never executed
+=======
+        6:  784:        size_t allocation_length = 0;
+        6:  785:        size_t skipped_bytes = 0;
+       30:  786:        while (((size_t)(input_end - input_buffer->content) < input_buffer->length) && (*input_end != '\"'))
+branch  0 taken 30 (fallthrough)
+branch  1 taken 0
+branch  2 taken 24
+branch  3 taken 6 (fallthrough)
+        -:  787:        {
+        -:  788:            /* is escape sequence */
+       24:  789:            if (input_end[0] == '\\')
+branch  0 taken 0 (fallthrough)
+branch  1 taken 24
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -:  790:            {
     #####:  791:                if ((size_t)(input_end + 1 - input_buffer->content) >= input_buffer->length)
 branch  0 never executed
@@ -1027,6 +1116,7 @@ branch  1 never executed
     #####:  796:                skipped_bytes++;
     #####:  797:                input_end++;
         -:  798:            }
+<<<<<<< HEAD
     #####:  799:            input_end++;
         -:  800:        }
     #####:  801:        if (((size_t)(input_end - input_buffer->content) >= input_buffer->length) || (*input_end != '\"'))
@@ -1034,22 +1124,41 @@ branch  0 never executed
 branch  1 never executed
 branch  2 never executed
 branch  3 never executed
+=======
+       24:  799:            input_end++;
+        -:  800:        }
+        6:  801:        if (((size_t)(input_end - input_buffer->content) >= input_buffer->length) || (*input_end != '\"'))
+branch  0 taken 6 (fallthrough)
+branch  1 taken 0
+branch  2 taken 0 (fallthrough)
+branch  3 taken 6
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -:  802:        {
     #####:  803:            goto fail; /* string ended unexpectedly */
         -:  804:        }
         -:  805:
         -:  806:        /* This is at most how much we need for the output */
+<<<<<<< HEAD
     #####:  807:        allocation_length = (size_t) (input_end - buffer_at_offset(input_buffer)) - skipped_bytes;
     #####:  808:        output = (unsigned char*)input_buffer->hooks.allocate(allocation_length + sizeof(""));
 call    0 never executed
     #####:  809:        if (output == NULL)
 branch  0 never executed
 branch  1 never executed
+=======
+        6:  807:        allocation_length = (size_t) (input_end - buffer_at_offset(input_buffer)) - skipped_bytes;
+        6:  808:        output = (unsigned char*)input_buffer->hooks.allocate(allocation_length + sizeof(""));
+call    0 returned 6
+        6:  809:        if (output == NULL)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -:  810:        {
     #####:  811:            goto fail; /* allocation failure */
         -:  812:        }
         -:  813:    }
         -:  814:
+<<<<<<< HEAD
     #####:  815:    output_pointer = output;
         -:  816:    /* loop through the string literal */
     #####:  817:    while (input_pointer < input_end)
@@ -1061,6 +1170,19 @@ branch  0 never executed
 branch  1 never executed
         -:  820:        {
     #####:  821:            *output_pointer++ = *input_pointer++;
+=======
+        6:  815:    output_pointer = output;
+        -:  816:    /* loop through the string literal */
+       30:  817:    while (input_pointer < input_end)
+branch  0 taken 24
+branch  1 taken 6 (fallthrough)
+        -:  818:    {
+       24:  819:        if (*input_pointer != '\\')
+branch  0 taken 24 (fallthrough)
+branch  1 taken 0
+        -:  820:        {
+       24:  821:            *output_pointer++ = *input_pointer++;
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -:  822:        }
         -:  823:        /* escape sequence */
         -:  824:        else
@@ -1125,6 +1247,7 @@ branch  1 never executed
         -:  870:    }
         -:  871:
         -:  872:    /* zero terminate the output */
+<<<<<<< HEAD
     #####:  873:    *output_pointer = '\0';
         -:  874:
     #####:  875:    item->type = cJSON_String;
@@ -1134,6 +1257,17 @@ branch  1 never executed
     #####:  879:    input_buffer->offset++;
         -:  880:
     #####:  881:    return true;
+=======
+        6:  873:    *output_pointer = '\0';
+        -:  874:
+        6:  875:    item->type = cJSON_String;
+        6:  876:    item->valuestring = (char*)output;
+        -:  877:
+        6:  878:    input_buffer->offset = (size_t) (input_end - input_buffer->content);
+        6:  879:    input_buffer->offset++;
+        -:  880:
+        6:  881:    return true;
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -:  882:
     #####:  883:fail:
     #####:  884:    if (output != NULL)
@@ -1328,6 +1462,7 @@ call    0 never executed
         -: 1031:static cJSON_bool print_object(const cJSON * const item, printbuffer * const output_buffer);
         -: 1032:
         -: 1033:/* Utility to jump whitespace and cr/lf */
+<<<<<<< HEAD
 function buffer_skip_whitespace called 1 returned 100% blocks executed 73%
         1: 1034:static parse_buffer *buffer_skip_whitespace(parse_buffer * const buffer)
         -: 1035:{
@@ -1336,19 +1471,38 @@ branch  0 taken 1 (fallthrough)
 branch  1 taken 0
 branch  2 taken 0 (fallthrough)
 branch  3 taken 1
+=======
+function buffer_skip_whitespace called 17 returned 100% blocks executed 80%
+       17: 1034:static parse_buffer *buffer_skip_whitespace(parse_buffer * const buffer)
+        -: 1035:{
+       17: 1036:    if ((buffer == NULL) || (buffer->content == NULL))
+branch  0 taken 17 (fallthrough)
+branch  1 taken 0
+branch  2 taken 0 (fallthrough)
+branch  3 taken 17
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1037:    {
     #####: 1038:        return NULL;
         -: 1039:    }
         -: 1040:
+<<<<<<< HEAD
         1: 1041:    if (cannot_access_at_index(buffer, 0))
 branch  0 taken 1 (fallthrough)
 branch  1 taken 0
 branch  2 taken 0 (fallthrough)
 branch  3 taken 1
+=======
+       17: 1041:    if (cannot_access_at_index(buffer, 0))
+branch  0 taken 17 (fallthrough)
+branch  1 taken 0
+branch  2 taken 0 (fallthrough)
+branch  3 taken 17
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1042:    {
     #####: 1043:        return buffer;
         -: 1044:    }
         -: 1045:
+<<<<<<< HEAD
         1: 1046:    while (can_access_at_index(buffer, 0) && (buffer_at_offset(buffer)[0] <= 32))
 branch  0 taken 1 (fallthrough)
 branch  1 taken 0
@@ -1363,11 +1517,31 @@ branch  5 taken 1 (fallthrough)
         1: 1051:    if (buffer->offset == buffer->length)
 branch  0 taken 0 (fallthrough)
 branch  1 taken 1
+=======
+       30: 1046:    while (can_access_at_index(buffer, 0) && (buffer_at_offset(buffer)[0] <= 32))
+branch  0 taken 30 (fallthrough)
+branch  1 taken 0
+branch  2 taken 30 (fallthrough)
+branch  3 taken 0
+branch  4 taken 13
+branch  5 taken 17 (fallthrough)
+        -: 1047:    {
+       13: 1048:       buffer->offset++;
+        -: 1049:    }
+        -: 1050:
+       17: 1051:    if (buffer->offset == buffer->length)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 17
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1052:    {
     #####: 1053:        buffer->offset--;
         -: 1054:    }
         -: 1055:
+<<<<<<< HEAD
         1: 1056:    return buffer;
+=======
+       17: 1056:    return buffer;
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1057:}
         -: 1058:
         -: 1059:/* skip the UTF-8 BOM (byte order mark) if it is at the beginning of a buffer */
@@ -1716,6 +1890,7 @@ call    0 never executed
         -: 1305:}
         -: 1306:
         -: 1307:/* Parser core - when encountering text, process appropriately. */
+<<<<<<< HEAD
 function parse_value called 1 returned 100% blocks executed 69%
         1: 1308:static cJSON_bool parse_value(cJSON * const item, parse_buffer * const input_buffer)
         -: 1309:{
@@ -1724,12 +1899,23 @@ branch  0 taken 1 (fallthrough)
 branch  1 taken 0
 branch  2 taken 0 (fallthrough)
 branch  3 taken 1
+=======
+function parse_value called 5 returned 100% blocks executed 79%
+        5: 1308:static cJSON_bool parse_value(cJSON * const item, parse_buffer * const input_buffer)
+        -: 1309:{
+        5: 1310:    if ((input_buffer == NULL) || (input_buffer->content == NULL))
+branch  0 taken 5 (fallthrough)
+branch  1 taken 0
+branch  2 taken 0 (fallthrough)
+branch  3 taken 5
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1311:    {
     #####: 1312:        return false; /* no input */
         -: 1313:    }
         -: 1314:
         -: 1315:    /* parse the different types of values */
         -: 1316:    /* null */
+<<<<<<< HEAD
         1: 1317:    if (can_read(input_buffer, 4) && (strncmp((const char*)buffer_at_offset(input_buffer), "null", 4) == 0))
 branch  0 taken 1 (fallthrough)
 branch  1 taken 0
@@ -1737,12 +1923,22 @@ branch  2 taken 1 (fallthrough)
 branch  3 taken 0
 branch  4 taken 0 (fallthrough)
 branch  5 taken 1
+=======
+        5: 1317:    if (can_read(input_buffer, 4) && (strncmp((const char*)buffer_at_offset(input_buffer), "null", 4) == 0))
+branch  0 taken 5 (fallthrough)
+branch  1 taken 0
+branch  2 taken 5 (fallthrough)
+branch  3 taken 0
+branch  4 taken 0 (fallthrough)
+branch  5 taken 5
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1318:    {
     #####: 1319:        item->type = cJSON_NULL;
     #####: 1320:        input_buffer->offset += 4;
     #####: 1321:        return true;
         -: 1322:    }
         -: 1323:    /* false */
+<<<<<<< HEAD
         1: 1324:    if (can_read(input_buffer, 5) && (strncmp((const char*)buffer_at_offset(input_buffer), "false", 5) == 0))
 branch  0 taken 1 (fallthrough)
 branch  1 taken 0
@@ -1750,12 +1946,22 @@ branch  2 taken 1 (fallthrough)
 branch  3 taken 0
 branch  4 taken 0 (fallthrough)
 branch  5 taken 1
+=======
+        5: 1324:    if (can_read(input_buffer, 5) && (strncmp((const char*)buffer_at_offset(input_buffer), "false", 5) == 0))
+branch  0 taken 5 (fallthrough)
+branch  1 taken 0
+branch  2 taken 5 (fallthrough)
+branch  3 taken 0
+branch  4 taken 0 (fallthrough)
+branch  5 taken 5
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1325:    {
     #####: 1326:        item->type = cJSON_False;
     #####: 1327:        input_buffer->offset += 5;
     #####: 1328:        return true;
         -: 1329:    }
         -: 1330:    /* true */
+<<<<<<< HEAD
         1: 1331:    if (can_read(input_buffer, 4) && (strncmp((const char*)buffer_at_offset(input_buffer), "true", 4) == 0))
 branch  0 taken 1 (fallthrough)
 branch  1 taken 0
@@ -1763,6 +1969,15 @@ branch  2 taken 1 (fallthrough)
 branch  3 taken 0
 branch  4 taken 0 (fallthrough)
 branch  5 taken 1
+=======
+        5: 1331:    if (can_read(input_buffer, 4) && (strncmp((const char*)buffer_at_offset(input_buffer), "true", 4) == 0))
+branch  0 taken 5 (fallthrough)
+branch  1 taken 0
+branch  2 taken 5 (fallthrough)
+branch  3 taken 0
+branch  4 taken 0 (fallthrough)
+branch  5 taken 5
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1332:    {
     #####: 1333:        item->type = cJSON_True;
     #####: 1334:        item->valueint = 1;
@@ -1770,6 +1985,7 @@ branch  5 taken 1
     #####: 1336:        return true;
         -: 1337:    }
         -: 1338:    /* string */
+<<<<<<< HEAD
         1: 1339:    if (can_access_at_index(input_buffer, 0) && (buffer_at_offset(input_buffer)[0] == '\"'))
 branch  0 taken 1 (fallthrough)
 branch  1 taken 0
@@ -1793,11 +2009,37 @@ branch  6 taken 1 (fallthrough)
 branch  7 taken 0
 branch  8 taken 0 (fallthrough)
 branch  9 taken 1
+=======
+        5: 1339:    if (can_access_at_index(input_buffer, 0) && (buffer_at_offset(input_buffer)[0] == '\"'))
+branch  0 taken 5 (fallthrough)
+branch  1 taken 0
+branch  2 taken 5 (fallthrough)
+branch  3 taken 0
+branch  4 taken 2 (fallthrough)
+branch  5 taken 3
+        -: 1340:    {
+        2: 1341:        return parse_string(item, input_buffer);
+call    0 returned 2
+        -: 1342:    }
+        -: 1343:    /* number */
+        3: 1344:    if (can_access_at_index(input_buffer, 0) && ((buffer_at_offset(input_buffer)[0] == '-') || ((buffer_at_offset(input_buffer)[0] >= '0') && (buffer_at_offset(input_buffer)[0] <= '9'))))
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+branch  2 taken 3 (fallthrough)
+branch  3 taken 0
+branch  4 taken 3 (fallthrough)
+branch  5 taken 0
+branch  6 taken 3 (fallthrough)
+branch  7 taken 0
+branch  8 taken 0 (fallthrough)
+branch  9 taken 3
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1345:    {
     #####: 1346:        return parse_number(item, input_buffer);
 call    0 never executed
         -: 1347:    }
         -: 1348:    /* array */
+<<<<<<< HEAD
         1: 1349:    if (can_access_at_index(input_buffer, 0) && (buffer_at_offset(input_buffer)[0] == '['))
 branch  0 taken 1 (fallthrough)
 branch  1 taken 0
@@ -1805,11 +2047,21 @@ branch  2 taken 1 (fallthrough)
 branch  3 taken 0
 branch  4 taken 0 (fallthrough)
 branch  5 taken 1
+=======
+        3: 1349:    if (can_access_at_index(input_buffer, 0) && (buffer_at_offset(input_buffer)[0] == '['))
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+branch  2 taken 3 (fallthrough)
+branch  3 taken 0
+branch  4 taken 0 (fallthrough)
+branch  5 taken 3
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1350:    {
     #####: 1351:        return parse_array(item, input_buffer);
 call    0 never executed
         -: 1352:    }
         -: 1353:    /* object */
+<<<<<<< HEAD
         1: 1354:    if (can_access_at_index(input_buffer, 0) && (buffer_at_offset(input_buffer)[0] == '{'))
 branch  0 taken 1 (fallthrough)
 branch  1 taken 0
@@ -1820,6 +2072,18 @@ branch  5 taken 1
         -: 1355:    {
     #####: 1356:        return parse_object(item, input_buffer);
 call    0 never executed
+=======
+        3: 1354:    if (can_access_at_index(input_buffer, 0) && (buffer_at_offset(input_buffer)[0] == '{'))
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+branch  2 taken 3 (fallthrough)
+branch  3 taken 0
+branch  4 taken 2 (fallthrough)
+branch  5 taken 1
+        -: 1355:    {
+        2: 1356:        return parse_object(item, input_buffer);
+call    0 returned 2
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1357:    }
         -: 1358:
         1: 1359:    return false;
@@ -2159,6 +2423,7 @@ branch  1 never executed
         -: 1594:}
         -: 1595:
         -: 1596:/* Build an object from the text. */
+<<<<<<< HEAD
 function parse_object called 0 returned 0% blocks executed 0%
     #####: 1597:static cJSON_bool parse_object(cJSON * const item, parse_buffer * const input_buffer)
         -: 1598:{
@@ -2180,10 +2445,34 @@ branch  2 never executed
 branch  3 never executed
 branch  4 never executed
 branch  5 never executed
+=======
+function parse_object called 2 returned 100% blocks executed 70%
+        2: 1597:static cJSON_bool parse_object(cJSON * const item, parse_buffer * const input_buffer)
+        -: 1598:{
+        2: 1599:    cJSON *head = NULL; /* linked list head */
+        2: 1600:    cJSON *current_item = NULL;
+        -: 1601:
+        2: 1602:    if (input_buffer->depth >= CJSON_NESTING_LIMIT)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+        -: 1603:    {
+    #####: 1604:        return false; /* to deeply nested */
+        -: 1605:    }
+        2: 1606:    input_buffer->depth++;
+        -: 1607:
+        2: 1608:    if (cannot_access_at_index(input_buffer, 0) || (buffer_at_offset(input_buffer)[0] != '{'))
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+branch  2 taken 2 (fallthrough)
+branch  3 taken 0
+branch  4 taken 0 (fallthrough)
+branch  5 taken 2
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1609:    {
     #####: 1610:        goto fail; /* not an object */
         -: 1611:    }
         -: 1612:
+<<<<<<< HEAD
     #####: 1613:    input_buffer->offset++;
     #####: 1614:    buffer_skip_whitespace(input_buffer);
 call    0 never executed
@@ -2194,47 +2483,89 @@ branch  2 never executed
 branch  3 never executed
 branch  4 never executed
 branch  5 never executed
+=======
+        2: 1613:    input_buffer->offset++;
+        2: 1614:    buffer_skip_whitespace(input_buffer);
+call    0 returned 2
+        2: 1615:    if (can_access_at_index(input_buffer, 0) && (buffer_at_offset(input_buffer)[0] == '}'))
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+branch  2 taken 2 (fallthrough)
+branch  3 taken 0
+branch  4 taken 0 (fallthrough)
+branch  5 taken 2
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1616:    {
     #####: 1617:        goto success; /* empty object */
         -: 1618:    }
         -: 1619:
         -: 1620:    /* check if we skipped to the end of the buffer */
+<<<<<<< HEAD
     #####: 1621:    if (cannot_access_at_index(input_buffer, 0))
 branch  0 never executed
 branch  1 never executed
 branch  2 never executed
 branch  3 never executed
+=======
+        2: 1621:    if (cannot_access_at_index(input_buffer, 0))
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1622:    {
     #####: 1623:        input_buffer->offset--;
     #####: 1624:        goto fail;
         -: 1625:    }
         -: 1626:
         -: 1627:    /* step back to character in front of the first element */
+<<<<<<< HEAD
     #####: 1628:    input_buffer->offset--;
+=======
+        2: 1628:    input_buffer->offset--;
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1629:    /* loop through the comma separated array elements */
         -: 1630:    do
         -: 1631:    {
         -: 1632:        /* allocate next item */
+<<<<<<< HEAD
     #####: 1633:        cJSON *new_item = cJSON_New_Item(&(input_buffer->hooks));
 call    0 never executed
     #####: 1634:        if (new_item == NULL)
 branch  0 never executed
 branch  1 never executed
+=======
+        4: 1633:        cJSON *new_item = cJSON_New_Item(&(input_buffer->hooks));
+call    0 returned 4
+        4: 1634:        if (new_item == NULL)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1635:        {
     #####: 1636:            goto fail; /* allocation failure */
         -: 1637:        }
         -: 1638:
         -: 1639:        /* attach next item to list */
+<<<<<<< HEAD
     #####: 1640:        if (head == NULL)
 branch  0 never executed
 branch  1 never executed
         -: 1641:        {
         -: 1642:            /* start the linked list */
     #####: 1643:            current_item = head = new_item;
+=======
+        4: 1640:        if (head == NULL)
+branch  0 taken 2 (fallthrough)
+branch  1 taken 2
+        -: 1641:        {
+        -: 1642:            /* start the linked list */
+        2: 1643:            current_item = head = new_item;
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1644:        }
         -: 1645:        else
         -: 1646:        {
         -: 1647:            /* add to the end and advance */
+<<<<<<< HEAD
     #####: 1648:            current_item->next = new_item;
     #####: 1649:            new_item->prev = current_item;
     #####: 1650:            current_item = new_item;
@@ -2265,11 +2596,44 @@ branch  2 never executed
 branch  3 never executed
 branch  4 never executed
 branch  5 never executed
+=======
+        2: 1648:            current_item->next = new_item;
+        2: 1649:            new_item->prev = current_item;
+        2: 1650:            current_item = new_item;
+        -: 1651:        }
+        -: 1652:
+        -: 1653:        /* parse the name of the child */
+        4: 1654:        input_buffer->offset++;
+        4: 1655:        buffer_skip_whitespace(input_buffer);
+call    0 returned 4
+        4: 1656:        if (!parse_string(current_item, input_buffer))
+call    0 returned 4
+branch  1 taken 0 (fallthrough)
+branch  2 taken 4
+        -: 1657:        {
+    #####: 1658:            goto fail; /* failed to parse name */
+        -: 1659:        }
+        4: 1660:        buffer_skip_whitespace(input_buffer);
+call    0 returned 4
+        -: 1661:
+        -: 1662:        /* swap valuestring and string, because we parsed the name */
+        4: 1663:        current_item->string = current_item->valuestring;
+        4: 1664:        current_item->valuestring = NULL;
+        -: 1665:
+        4: 1666:        if (cannot_access_at_index(input_buffer, 0) || (buffer_at_offset(input_buffer)[0] != ':'))
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+branch  2 taken 4 (fallthrough)
+branch  3 taken 0
+branch  4 taken 0 (fallthrough)
+branch  5 taken 4
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1667:        {
     #####: 1668:            goto fail; /* invalid object */
         -: 1669:        }
         -: 1670:
         -: 1671:        /* parse the value */
+<<<<<<< HEAD
     #####: 1672:        input_buffer->offset++;
     #####: 1673:        buffer_skip_whitespace(input_buffer);
 call    0 never executed
@@ -2290,6 +2654,28 @@ branch  2 never executed
 branch  3 never executed
 branch  4 never executed
 branch  5 never executed
+=======
+        4: 1672:        input_buffer->offset++;
+        4: 1673:        buffer_skip_whitespace(input_buffer);
+call    0 returned 4
+        4: 1674:        if (!parse_value(current_item, input_buffer))
+call    0 returned 4
+branch  1 taken 2 (fallthrough)
+branch  2 taken 2
+        -: 1675:        {
+        2: 1676:            goto fail; /* failed to parse value */
+        -: 1677:        }
+        2: 1678:        buffer_skip_whitespace(input_buffer);
+call    0 returned 2
+        -: 1679:    }
+        2: 1680:    while (can_access_at_index(input_buffer, 0) && (buffer_at_offset(input_buffer)[0] == ','));
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+branch  2 taken 2 (fallthrough)
+branch  3 taken 0
+branch  4 taken 2
+branch  5 taken 0 (fallthrough)
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1681:
     #####: 1682:    if (cannot_access_at_index(input_buffer, 0) || (buffer_at_offset(input_buffer)[0] != '}'))
 branch  0 never executed
@@ -2317,6 +2703,7 @@ branch  1 never executed
     #####: 1697:    input_buffer->offset++;
     #####: 1698:    return true;
         -: 1699:
+<<<<<<< HEAD
     #####: 1700:fail:
     #####: 1701:    if (head != NULL)
 branch  0 never executed
@@ -2327,6 +2714,18 @@ call    0 never executed
         -: 1704:    }
         -: 1705:
     #####: 1706:    return false;
+=======
+        2: 1700:fail:
+        2: 1701:    if (head != NULL)
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        -: 1702:    {
+        2: 1703:        cJSON_Delete(head);
+call    0 returned 2
+        -: 1704:    }
+        -: 1705:
+        2: 1706:    return false;
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -: 1707:}
         -: 1708:
         -: 1709:/* Render an object to text. */

@@ -87,6 +87,10 @@ void save_data(char* filename,int pipe){
         exit(1);
     }
 
+<<<<<<< HEAD
+=======
+    free(content);
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
 }
 
 void write_result(char* inp, int inp_size,int order){
@@ -135,8 +139,19 @@ void write_result(char* inp, int inp_size,int order){
 }
 
 void execute_target(char* inp, int inp_size){
+<<<<<<< HEAD
     dup2(pipe_stdin[0],0);
     close(pipe_stdin[1]);
+=======
+    int sent = 0;
+    while(sent < inp_size){
+        sent += write(pipe_stdin[1],inp + sent,inp_size - sent);
+    }
+    close(pipe_stdin[1]);
+
+    dup2(pipe_stdin[0],0);
+    
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
     close(pipe_stdin[0]);
     close(pipe_stdout[0]);
     close(pipe_stderr[0]);
@@ -144,6 +159,13 @@ void execute_target(char* inp, int inp_size){
     dup2(pipe_stdout[1],STDOUT_FILENO);
     dup2(pipe_stderr[1],STDERR_FILENO);
 
+<<<<<<< HEAD
+=======
+    if(test_config.run_arg.fuzz_type == 1){
+        test_config.run_arg.cmd_args[test_config.run_arg.args_num+1] = inp;
+    }
+
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
     close(pipe_stderr[1]);
     close(pipe_stdout[1]);
 
@@ -176,6 +198,7 @@ int run(run_arg_t run_config ,char* random_inp,int inp_size,int order){
         write_result(random_inp,inp_size,order);
     
     }else if(child == 0){
+<<<<<<< HEAD
         
         int sent = 0;
         
@@ -183,6 +206,8 @@ int run(run_arg_t run_config ,char* random_inp,int inp_size,int order){
         {
             sent += write(pipe_stdin[1],random_inp + sent,inp_size - sent);
         }
+=======
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
 
         alarm(run_config.timeout);
         execute_target(random_inp,inp_size);
@@ -201,7 +226,11 @@ void seed_search(run_arg_t* run_config){
     struct dirent * ep;
     dp = opendir(run_config->seed_dir);
     int idx = 0;
+<<<<<<< HEAD
     char*path = (char*)malloc(sizeof(char) *PATH_MAX);
+=======
+
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
     while(ep = readdir(dp)){
         if(ep->d_type == DT_REG){
 
@@ -209,6 +238,11 @@ void seed_search(run_arg_t* run_config){
 
             int name_length = strlen(ep->d_name);
 
+<<<<<<< HEAD
+=======
+            char* path = (char*)malloc(sizeof(char) * (seed_dir_length + name_length + 2 ));
+
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
             sprintf(path,"%s/%s",run_config->seed_dir,ep->d_name);
 
             char buf[BUFFER_SIZE];
@@ -218,18 +252,30 @@ void seed_search(run_arg_t* run_config){
             int total_len = 0;
             int sent = 0;
 
+<<<<<<< HEAD
             run_config->seed_inp[idx] = (char*)malloc(sizeof(char)* BUFFER_SIZE);
 
             while((sent = fread(buf,sizeof(char),BUFFER_SIZE,fp)) > 0){
                 if(total_len + sent > BUFFER_SIZE){
                 char* check = realloc(run_config->seed_inp[idx],sizeof(char)*((total_len/BUFFER_SIZE)+1)*BUFFER_SIZE);
+=======
+            run_config->seed_file_name[idx] = (char*)malloc(sizeof(char)* BUFFER_SIZE);
+
+            while((sent = fread(buf,sizeof(char),BUFFER_SIZE,fp)) > 0){
+                if(total_len + sent > BUFFER_SIZE){
+                char* check = realloc(run_config->seed_file_name[idx],sizeof(char)*((total_len/BUFFER_SIZE)+1)*BUFFER_SIZE);
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
                     if(check == NULL){
                         perror("failed to realloc\n");
                         exit(0);
                     }        
                 }
 
+<<<<<<< HEAD
                 if(memcpy(run_config->seed_inp[idx] + total_len,buf,sent) == NULL){
+=======
+                if(memcpy(run_config->seed_file_name[idx] + total_len,buf,sent) == NULL){
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
                     perror("seed_read memcpy failed\n");
                     return;
                 }
@@ -238,13 +284,17 @@ void seed_search(run_arg_t* run_config){
                     perror("buf memset failed\n");
                 }
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
                 total_len += sent;
             }
 
             fclose(fp);
             
+<<<<<<< HEAD
             if(total_len == 0)
             {
                 perror("No seed_input\n");
@@ -263,6 +313,21 @@ void seed_search(run_arg_t* run_config){
     }
 
     free(path);
+=======
+            if(total_len == 0){
+                perror("No seed_input\n");
+                return;
+            }
+
+            run_config->seed_file_name[idx][total_len] ='\0';
+            run_config->seed_length[idx] = total_len;
+            
+            free(path);
+
+            idx++;
+        }
+    }
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
     run_config->seed_file_num = idx;
     closedir(dp);
 }
@@ -277,8 +342,12 @@ void fuzzer_init(config_t* config){
 
     }else{
 
+<<<<<<< HEAD
         int src_dir_exist = access(config->run_arg.src_dir,00);
         assert(src_dir_exist == 0 && "this dirtory doesn't exist or can't excute\n");
+=======
+        int dir_length = strlen(config->run_arg.src_dir);
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
 
         strcpy(test_config.run_arg.src_dir,config->run_arg.src_dir);
     }
@@ -290,20 +359,39 @@ void fuzzer_init(config_t* config){
         
         for(int i = 0; i < test_config.run_arg.src_file_num; i++){
 
+<<<<<<< HEAD
             int src_dir_length = strlen(config->run_arg.src_dir);
             int src_file_length = strlen(config->run_arg.src_file[i]);
 
             char* file_checker = (char*)malloc(sizeof(char)* (src_dir_length + src_file_length + 2 ));
             sprintf(file_checker,"%s/%s",config->run_arg.src_dir,config->run_arg.src_file[i]);
+=======
+            int length = strlen(config->run_arg.src_file[i]);
+
+            test_config.run_arg.src_file[i] = (char*)malloc(sizeof(char)*(length + 1));
+
+            strcpy(test_config.run_arg.src_file[i],config->run_arg.src_file[i]);
+
+            int src_dir_length = strlen(test_config.run_arg.src_dir);
+
+            int src_file_length = strlen(test_config.run_arg.src_file[i]);
+
+            char* file_checker = (char*)malloc(sizeof(char)* (src_dir_length + src_file_length + 2 ));
+
+            sprintf(file_checker,"%s/%s",test_config.run_arg.src_dir,test_config.run_arg.src_file[i]);
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
             
             int src_exist = access(file_checker,F_OK);
             assert(src_exist == 0 && "this file doesn't exist or can't read\n");
 
+<<<<<<< HEAD
             int length = strlen(config->run_arg.src_file[i]);
             test_config.run_arg.src_file[i] = (char*)malloc(sizeof(char)*(length + 1));
 
             strcpy(test_config.run_arg.src_file[i],config->run_arg.src_file[i]);
 
+=======
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
             free(file_checker);
         }
     }
@@ -317,12 +405,22 @@ void fuzzer_init(config_t* config){
             exit(1);
 
         }else{
+<<<<<<< HEAD
             int binary_exist = access(config->run_arg.binary_path,X_OK);
             assert(binary_exist == 0 && "this file doesn't exist or can't excute\n");
+=======
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
 
             test_config.run_arg.binary_path = (char*)malloc(sizeof(char)*(strlen(config->run_arg.binary_path)+1));
 
             strcpy(test_config.run_arg.binary_path,config->run_arg.binary_path);
+<<<<<<< HEAD
+=======
+            
+            int binary_exist = access(test_config.run_arg.binary_path,X_OK);
+            assert(binary_exist == 0 && "this file doesn't exist or can't excute\n");
+
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         }
     }
 
@@ -336,11 +434,19 @@ void fuzzer_init(config_t* config){
 
         }else{
 
+<<<<<<< HEAD
             int seed_exist = access(config->run_arg.seed_dir,00);
             assert(seed_exist == 0 && "this dirtory doesn't exist or can't excute\n");
 
             strcpy(test_config.run_arg.seed_dir,config->run_arg.seed_dir);
             
+=======
+            strcpy(test_config.run_arg.seed_dir,config->run_arg.seed_dir);
+
+            int seed_exist = access(test_config.run_arg.seed_dir,00);
+            assert(seed_exist == 0 && "this dirtory doesn't exist or can't excute\n");
+
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
             //get seed
             seed_search(&test_config.run_arg);
         }
@@ -443,7 +549,11 @@ void config_free(run_arg_t* run, input_arg_t* inp){
     }
 
     for(int i = 0; i < run->seed_file_num;i++){
+<<<<<<< HEAD
         free(run->seed_inp[i]);
+=======
+        free(run->seed_file_name[i]);
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
     }
 
     if(run->fuzz_type == 1){
@@ -466,7 +576,11 @@ char* create_candidate(config_t* config,sched_info_t* sched_info,int* inp_size){
 
     char* candidate = (char*)malloc(sizeof(char)*BUFFER_SIZE);
 
+<<<<<<< HEAD
     if(memcpy(candidate,config->run_arg.seed_inp[seed_idx], config->run_arg.seed_length[seed_idx]) == NULL){
+=======
+    if(memcpy(candidate,config->run_arg.seed_file_name[seed_idx], config->run_arg.seed_length[seed_idx]) == NULL){
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         perror("seed copy failed\n");
         exit(1);
     }
@@ -503,7 +617,11 @@ void sellect_candidate(config_t* config,sched_info_t* sched_info,char* inp, int*
 
         *inp_size = config->run_arg.seed_length[*seed_idx];
 
+<<<<<<< HEAD
         if(memcpy(inp,config->run_arg.seed_inp[*seed_idx],*inp_size) == NULL){
+=======
+        if(memcpy(inp,config->run_arg.seed_file_name[*seed_idx],*inp_size) == NULL){
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
             
             perror("seed copy failed\n");
             exit(1); 
@@ -542,7 +660,11 @@ void fuzzer_main(config_t* config){
     }
     
     struct itimerval t;
+<<<<<<< HEAD
     time_t start,end,start1,end1,start2,end2;
+=======
+    time_t start,end;
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
     signal(SIGALRM,timeout_handler);
 
     //####
@@ -554,15 +676,21 @@ void fuzzer_main(config_t* config){
         total_br_coverage[i] = (float*)malloc(sizeof(float)*test_config.trial);
     }
     //###
+<<<<<<< HEAD
     double excution1 = 0;
     double excution2 = 0;
+=======
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
 
     start = clock();
 
     int seed_idx = 0;
     int length = 0;
     char random_inp[BUFFER_SIZE];
+<<<<<<< HEAD
 
+=======
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
     for(int i = 0; i < test_config.trial ;i++){
 
         //#2 fuzzer_create_input();
@@ -593,6 +721,7 @@ void fuzzer_main(config_t* config){
         }
 
         //#3 fuzzer_run();
+<<<<<<< HEAD
         start1 = clock();
         int return_code = run(test_config.run_arg,random_inp,random_size,i);
         end1 =clock();
@@ -601,6 +730,13 @@ void fuzzer_main(config_t* config){
         //#4 fuzzer_oracle;
         test_config.oracle(tmp_dir_name,i,return_code);
         start2 = clock();
+=======
+        int return_code = run(test_config.run_arg,random_inp,random_size,i);
+
+        //#4 fuzzer_oracle;
+        test_config.oracle(tmp_dir_name,i,return_code);
+
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         if(test_config.coverage == 1){
             for(int j = 0; j < test_config.run_arg.src_file_num; j++){
 
@@ -614,8 +750,12 @@ void fuzzer_main(config_t* config){
                 total_br_coverage[j][i] = ((float)cover_set.total_excute_branch[j]/(float)cover_set.code_size[j][2])*100;
             }
         }
+<<<<<<< HEAD
         end2 =clock();
         excution2 = excution2 + (float)(end2-start2)/CLOCKS_PER_SEC;
+=======
+
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         if(return_code == 0){
             passed++;
         }else if(return_code > 0){
@@ -629,8 +769,11 @@ void fuzzer_main(config_t* config){
 
     printf("===================result summary=================\n");
     printf("excution time: %f\n",excution);
+<<<<<<< HEAD
     printf("excution time: %f\n",excution1);
     printf("excution time: %f\n",excution2);
+=======
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
     printf("running program per sec: %f\n",test_config.trial/excution);
     printf("failed percentage: %f%%\n",(failed/(float)test_config.trial)*100);
     printf("trial: %d\nPassed: %d\nFailed: %d\n",test_config.trial,passed,failed);
@@ -704,5 +847,9 @@ void fuzzer_main(config_t* config){
     }
 
     config_free(&test_config.run_arg,&test_config.inp_arg);
+<<<<<<< HEAD
     // delete_result();
+=======
+    delete_result();
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
 }

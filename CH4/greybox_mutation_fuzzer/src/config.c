@@ -24,7 +24,11 @@ void init_config(config_t * config){
     
     for(int i = 0; i < NUM_OF_MAX ; i++){
         config->run_arg.src_file[i] = NULL;
+<<<<<<< HEAD
         config->run_arg.seed_inp[i] = NULL;
+=======
+        config->run_arg.seed_file_name[i] = NULL;
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
     }
     
     config->run_arg.seed_file_num = 0;

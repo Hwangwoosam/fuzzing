@@ -109,6 +109,7 @@ function main called 1 returned 100% blocks executed 22%
         -:   65:    cJSON *json ; 
         -:   66:    
         -:   67:    // INPUT 
+<<<<<<< HEAD
       213:   68:    while( (c = getchar()) != EOF) {
 call    0 returned 213
 branch  1 taken 212
@@ -119,6 +120,18 @@ branch  1 taken 212
     #####:   70:            text = (char *)realloc(text, sizeof(char) * BUFF_SIZE * (++n)) ;
         -:   71:        }
       212:   72:        text[idx++] = c; 
+=======
+      245:   68:    while( (c = getchar()) != EOF) {
+call    0 returned 245
+branch  1 taken 244
+branch  2 taken 1 (fallthrough)
+      244:   69:        if (idx >= BUFF_SIZE) { 
+branch  0 taken 0 (fallthrough)
+branch  1 taken 244
+    #####:   70:            text = (char *)realloc(text, sizeof(char) * BUFF_SIZE * (++n)) ;
+        -:   71:        }
+      244:   72:        text[idx++] = c; 
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
         -:   73:    }
         1:   74:    text[idx] = '\0'; 
         -:   75:

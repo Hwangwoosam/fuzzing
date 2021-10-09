@@ -237,11 +237,19 @@ void read_gcov(coverage_set_t* cover_set,config_t* config,char* random, int rand
         }
         if(n_flag == 1){
 
+<<<<<<< HEAD
             config->run_arg.seed_inp[config->run_arg.seed_file_num] = (char*)malloc(sizeof(char)*BUFFER_SIZE);
             
             memcpy(config->run_arg.seed_inp[config->run_arg.seed_file_num],random,random_size);
             
             config->run_arg.seed_inp[config->run_arg.seed_file_num][random_size] = '\0';
+=======
+            config->run_arg.seed_file_name[config->run_arg.seed_file_num] = (char*)malloc(sizeof(char)*BUFFER_SIZE);
+            
+            memcpy(config->run_arg.seed_file_name[config->run_arg.seed_file_num],random,random_size);
+            
+            config->run_arg.seed_file_name[config->run_arg.seed_file_num][random_size] = '\0';
+>>>>>>> 6136e7fd96e41ca5795b0d9602032d4e1652a254
             config->run_arg.seed_length[config->run_arg.seed_file_num] = random_size;
 
             config->run_arg.seed_file_num++;
