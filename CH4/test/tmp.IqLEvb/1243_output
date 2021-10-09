@@ -1,9 +1,0 @@
-[JSON file structure]
-"glossary"
-"glossary"
-The content of text is not same with copy_text!
-<<< COPY ITEMS >>>
-"    \"glossary\": {\n        \"title\": \"example glossary\",\n\t\t\"ClossDiv\": {\n            \"title\": \"S\",\n\t\t\t\"GlossList\": {\n                \"Gl-hèèë\tntry\": {\n                    \"ID\": \"SGML\",\u000e\t\t\t\t\t\"SortAs\": \"SGML\",\n\t\t\t\t\t\"GlossTerm\": \"Standard Genepalized Markup Language\",\n\t\t\t\t\t\"AcronymSGML\",\n\t\t\t\t\t\"Abbrev\": \"ISO 8879:1986\",\n\t\t\t\t\t\"GlossDef\": {\n                   `    \"para\": \"A meda-markup language, used to create markup languages such as DocBook.\",\n\t\t\t\t\t\t\"GlêåsSeeAlso\": [\"GML\", \"XML\"]\n                    },\n\t\t\t\t\t\"GlossSee\": \"markuè\"\n                }\n            }\n        }\n    }\n"
-Copy is correct!
-"glossary"
-Structure of minified text is same with the structure of original text!

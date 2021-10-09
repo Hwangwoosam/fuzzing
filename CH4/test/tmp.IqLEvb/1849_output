@@ -1,9 +1,0 @@
-[JSON file structure]
-"glossary"
-"glossary"
-The content of text is not same with copy_text!
-<<< COPY ITEMS >>>
-"    \"glossary\": {\n        \"tle\": \"example gl"
-Copy is correct!
-"glossary"
-Structure of minified text is same with the structure of original text!

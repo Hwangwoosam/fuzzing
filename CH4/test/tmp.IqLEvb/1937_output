@@ -1,11 +1,0 @@
-Error before: [menu": {
-    "header": "SVG Viewer",
-    "items": [
-        {"id": "Open"},
-        {"id": "OpenNew", "label": "Open New"},
-6' 0      null,
-        { "id":"ZomIn "label": "Zoom In"},
-  +      {"id": "ZoomOut", "label": "Zoom Out"},
-        {"id": "OriginalV€iew", el": "Original View"},
-        null,
-      ]

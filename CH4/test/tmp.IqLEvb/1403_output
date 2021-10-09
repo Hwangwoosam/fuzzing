@@ -1,9 +1,0 @@
-[JSON file structure]
-"name"
-"name"
-The content of text is not same with copy_text!
-<<< COPY ITEMS >>>
-"\"name\": \"Jack (\\\"B\\\") Nimble\",\n\"format\": {\"ty8\"pe\":       \"rect\",\n\"width\":    1920,\n\"height\":    ]wIr 1080\"interlace\":  false,\"frame rate\": 24\n}\n"
-Copy is correct!
-"name"
-Structure of minified text is same with the structure of original text!

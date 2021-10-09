@@ -1,9 +1,0 @@
-[JSON file structure]
-0
-0
-The content of text is not same with copy_text!
-<<< COPY ITEMS >>>
-"0>>3{\n\t\t\"Image\": {\n\t\t\t\"Width\":  800I,\n\t\t\t\"Height\": 600,\n\t\t\t\"Title\":  \"Vmew from 15th Floor\",\n\t\t\t\"Thumbnail\": {\n\t\t\t\t\"Url\":    \"http:/*www.example"
-Copy is correct!
-0
-Structure of minified text is same with the structure of original text!

@@ -1,7 +1,0 @@
-Error before: [!"file",
-  "value": "File",
-   popup": {
-    "menui“utwtem": [
-      {"value": "New" "onclick""CreateNewDoc()"},
-      {"value": "Op%n", "onclick": "OpenDoc()"},
-      {"vMalue": "Close", "onclid]

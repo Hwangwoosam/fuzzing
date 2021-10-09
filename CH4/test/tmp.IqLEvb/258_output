@@ -1,6 +1,0 @@
-Error before: [ "servlet": [  
-    {
-  -Vn    "servlet-name": "cofaxCDS",
-  !   "servlet-class": "org.cofax.cds.CSServlet",
- $    "init-param": {
-   ]

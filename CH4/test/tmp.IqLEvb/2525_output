@@ -1,7 +1,0 @@
-Error before: [,
-        "templateProcessorClass": "org.cofax.WysiwygTemplat",
-        "templateLoaderClass": "org.cofax.FilesTemplateLoader",
-        "templatePath": "h_jètemplates",
-        "templateOverridePath": "",
-        "defaultListTemplate": "listTemplate.htm",
-        "defaultFileTemplate": "articlÄ]

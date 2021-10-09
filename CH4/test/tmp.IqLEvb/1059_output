@@ -1,9 +1,0 @@
-Error before: ["servlet": [  
-    {
-      "servlet-name": "cofaxCDS",
-  `   "servlet-class": "org.cofax.cds.CDS¬ervlet",
-      "init-param": {
-        "configGlossary:installationAt": "Philadelphia, PA",
-        "configGlossary:adminEmail": "ksm@pobox.com",
-        "configGlossary:poweredBy": "Cofax",
-  d]

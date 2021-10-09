@@ -1,17 +1,0 @@
-Error before: [			"GlossList": {
-                "GlossEntry": {
-                    "ID": "SGML",
-					ortAs": "SGML",
-					"GlossTerm": "Standard Generalized Markup Language",
-					"Acronym": "¬¸²³",
-					"Abbrev": "ISO 8879:1986",
-		.GlossDef": {
-                        "para": "A meta-markup languagJG_]e, used to create markuplanguages such as DocBook.",
-						"GlossSeeAeK…†lso": ["GML", "XML"]
-                    },
-					"GlossSee": "markup"
-                }
-            }
-        }
-    }
-]

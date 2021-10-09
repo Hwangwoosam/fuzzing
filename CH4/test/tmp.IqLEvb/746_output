@@ -1,16 +1,0 @@
-Error before: [\2,,
-	 "State":     "CA",
-	 "Zip":       "94107",
-	 "Count":   "US"
-	 },
-	 {
-	 "precision": "zip",
-	 "Latitude":  37.371991,
-	 "Longitude": -122.026020,
-	 "Address:   "",
-	 "City":     "C "SUNNYVALE",
-	 "State":     "CA",
-	 "Zip":       "94085",
-	 "Country":   "US"
-	 }
-	 ]

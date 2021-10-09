@@ -1,7 +1,0 @@
-Error before: [€ [
-      {"value": "New", "onclick": "Cr%ateNewDoc()"},
-      {"value": "Open", "onclick":`"OpenDoc()"},
-      {"value": "Close", "onclick": "CloseDoc()"}
-    ]
-  }
-}]

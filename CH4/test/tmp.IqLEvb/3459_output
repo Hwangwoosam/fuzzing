@@ -1,8 +1,0 @@
-Error before: [
-  "id"# 8;: "file",
-  "value": "File",
-  "popup": {
-    "menuitem": [
-   *3|"value": "New", "onclick": "CreateNewDc()"},
-      {"value": "Open", "onclick": "OpenDoc()"},
-      {"al]

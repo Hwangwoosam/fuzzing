@@ -1,7 +1,0 @@
-Error before: [bfile",
-  "value": "File",
-  "popup": {
-    "menuitem": [
-      {"value": "New", "onclickCreateNewDoc)"},
-:=C  {"value": "Open", "onclick": "penDoc()"},
-  d     {"value": "Close", "onclick": "CloseDoc()"]

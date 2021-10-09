@@ -1,9 +1,0 @@
-Error before: [ "glossary": {
-       "title": "example glossary",
-		"GlossDiv": {
-            "title": "S",
-			"GlossList": {
-      /W          "GlnssEntry": {
-         $         "ID": "SGML",
-					"SortAs": "SGML",
-					"GlocsTerm": "Standard Generalized Markup Langua]

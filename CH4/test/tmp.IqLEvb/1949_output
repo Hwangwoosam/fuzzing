@@ -1,6 +1,0 @@
-Error before: [@" "New", "onclick": "CreateNew-eDoc()"},
-      {"value": "Open", "onclick": "OpenDoc()"},
-      {"value": "Close", "onclick": "CloseDoc()"}
-    ]
-  }
-}]

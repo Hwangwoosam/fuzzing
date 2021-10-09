@@ -1,9 +1,0 @@
-Error before: [  "header": "SVG Viewer",
-    "items": [
-        {"id": "Open"},
-        {"id": "OpenNew", "label": "∞èöë New"},
-        null,
-        {"id": "ZoomIn", "label": "Zo\n:0n"}
-        {bid": "ZoomOut", "label": "Zoom Out"},
-        {"id": "OrigiNalView", "label": "Original View"},
-     ]

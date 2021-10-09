@@ -1,7 +1,0 @@
-Error before: [ß"configGlossary:installationAt": "Philadelphia, PA",
-        "configGlossary:adminEmail": "ksm@pobox.com",
-        "configGlossary:peredBy": "Cofax",
-        "configGlossary:poweredBxIcon": "/images/cofax.gif",
-        "configGlossary:staticPath": "/coAntent/static",
-        "templateProcessorClass": "org.cofax.WysiwygTemplate",
-        "templateLoaderClass": "org.cofax.FilesTemplateLoader]

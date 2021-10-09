@@ -1,13 +1,0 @@
-Error before: [glossary": {
-        "title": "example glossary",
-		"GlossDiv": {
-            "title": "			"GlossList": {
-                "GlossEntry": {
-                    "ID": "SGML",
-RUx1					"SortAs": "SGML",
-					"GlossTerm": "Standard Generalized Markup Language",
-					"Acronym": "SGML",
-					"Abbre": "ISO 8879:1986"
-					"GlossDef":
-{
-                        "para": "A meta-markup language, used to crdmarkup lan]

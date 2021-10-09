@@ -1,6 +1,0 @@
-Error before: [value": "File",
-  "popup": {
-    "menuitem": [
-      {"value": "New", "onick": "CreateNewDoc()"},
-   "value": "Open", "onclick--": "OpenDoc()"},
-      {"value": "Close", "onclick": ffLh"Cloc()"]

@@ -1,9 +1,0 @@
-Error before: [File",
-  "popwp": {
-    "menuitem": [
-      {"value": "New", "onclick": "CršateNewDoc()"},
-      {"value": "Openclick": "OpenDoc()"},
-      {"value": "Close!"bAonclick": "CseDoc()"}
-    ]
-  }
-}]

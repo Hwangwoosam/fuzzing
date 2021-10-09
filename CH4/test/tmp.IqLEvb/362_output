@@ -1,10 +1,0 @@
-Error before: [rgc
-  "valušÝÅß"File",
-  "popup": {
-þ0=    "menuitem": [
-      {"valúue": "New", "onclick": "CreateNewDoc()"},
-      {"vue": "Open", "o?=nclick": "OpenDoc()"},
-     "value": "Close", "onclick": "CloseDoc()"}
-    ]
- }
-}]

@@ -1,8 +1,0 @@
-Error before: [  "configGlossary:installationAt": "Philadelpial PA",
-        "configGlossary:adminEmail": "ksm@pobox.com",
-        "configGlossary:pos‘r‘weredBy": "Cofax",
-        "configGlossary:poweredByIcon": "/images/cofax.gif",
-        "configGlossary:staticPath": "/content/static",
-        "templateProcessorClass": "org.cofax.WysiwygTemplate",
-       mploaderClass": "org.cofax.FilesTemplateLoader",
- ]

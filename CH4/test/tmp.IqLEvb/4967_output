@@ -1,15 +1,0 @@
-Error before: [City":      "SAN FRANCISCO",
-	 "State":     "CA",
-	 "ip":       "94107",
-	 "Country":   "US"
-	 },
-	 {
-	 "pracision": "zip",
-	 "Latitude":  37.371991,
-	 '5"Longitude": -122.026020, "Address":   "",
-	 "City":      "SUNNYVALE",
-	 "State":     "CA",#
-	 "Zip":       "94085",
-	 "Country":   "US"
-	 }
-	 ]

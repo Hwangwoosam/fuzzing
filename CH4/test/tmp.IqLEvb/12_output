@@ -1,7 +1,0 @@
-[JSON file structure]
-["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-<<< COPY ITEMS >>>
-"[\"Sunday\", \"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\", \"Saturday\"]\n"
-Copy is correct!
-["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
-Structure of minified text is same with the structure of original text!

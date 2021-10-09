@@ -1,3 +1,0 @@
-Error before: ["popup": {
-    "menuitem": [
-      {"value": "ew", "onclick": "CreateNewDoc()"]

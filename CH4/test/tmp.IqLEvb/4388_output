@@ -1,4 +1,0 @@
-Error before: [configGlossary:staticPath": "/content/static",
-        "templateProcessorClass": "org.cofax.WysiwygTemplate",
-        "templateLoaderClass": o.cofax.FilesTemplateLoader",
-]

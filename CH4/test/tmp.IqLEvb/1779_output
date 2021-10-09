@@ -1,7 +1,0 @@
-[JSON file structure]
-"mä\u0003"
-<<< COPY ITEMS >>>
-"\"mä\u0003\""
-Copy is correct!
-"mä\u0003"
-Structure of minified text is same with the structure of original text!

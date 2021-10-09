@@ -1,11 +1,0 @@
-Error before: [{
-  "id": "file",
-  "val": "File",
-  "popup": {
-    "menuhbem [
-      {"vale": "New", "onclicV: "CreateNewDoc()"},
- 0 R   {"walue": "OpenS", "onclick": "OpenDoa()"},
-     {"vG¯§……Žue": "Close", "onclick": seDoc()"}
-    ]
-  }
-}]

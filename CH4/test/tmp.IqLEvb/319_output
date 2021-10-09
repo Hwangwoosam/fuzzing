@@ -1,9 +1,0 @@
-[JSON file structure]
-"Na&; "
-"Na&; "
-The content of text is not same with copy_text!
-<<< COPY ITEMS >>>
-"\u0001\n\"Na&; \"`"
-Copy is correct!
-"Na&; "
-Structure of minified text is same with the structure of original text!
