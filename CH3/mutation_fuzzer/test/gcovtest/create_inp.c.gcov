@@ -1,0 +1,557 @@
+        -:    0:Source:../../src/create_inp.c
+        -:    0:Graph:create_inp.gcno
+        -:    0:Data:create_inp.gcda
+        -:    0:Runs:100
+        -:    1:#include <stdio.h>
+        -:    2:#include <stdlib.h>
+        -:    3:#include <string.h>
+        -:    4:#include <stdint.h>
+        -:    5:
+        -:    6:#include "../include/create_inp.h"
+        -:    7:#include "../include/config.h"
+        -:    8:
+        -:    9:
+        -:   10:#define INTERESTING_8 \
+        -:   11:  -128,          /* Overflow signed 8-bit when decremented  */ \
+        -:   12:  -1,            /*                                         */ \
+        -:   13:   0,            /*                                         */ \
+        -:   14:   1,            /*                                         */ \
+        -:   15:   16,           /* One-off with common buffer size         */ \
+        -:   16:   32,           /* One-off with common buffer size         */ \
+        -:   17:   64,           /* One-off with common buffer size         */ \
+        -:   18:   100,          /* One-off with common buffer size         */ \
+        -:   19:   127           /* Overflow signed 8-bit when incremented  */
+        -:   20:
+        -:   21:#define INTERESTING_16 \
+        -:   22:  -32768,        /* Overflow signed 16-bit when decremented */ \
+        -:   23:  -129,          /* Overflow signed 8-bit                   */ \
+        -:   24:   128,          /* Overflow signed 8-bit                   */ \
+        -:   25:   255,          /* Overflow unsig 8-bit when incremented   */ \
+        -:   26:   256,          /* Overflow unsig 8-bit                    */ \
+        -:   27:   512,          /* One-off with common buffer size         */ \
+        -:   28:   1000,         /* One-off with common buffer size         */ \
+        -:   29:   1024,         /* One-off with common buffer size         */ \
+        -:   30:   4096,         /* One-off with common buffer size         */ \
+        -:   31:   32767         /* Overflow signed 16-bit when incremented */
+        -:   32:
+        -:   33:#define INTERESTING_32 \
+        -:   34:  -2147483648LL, /* Overflow signed 32-bit when decremented */ \
+        -:   35:  -100663046,    /* Large negative number (endian-agnostic) */ \
+        -:   36:  -32769,        /* Overflow signed 16-bit                  */ \
+        -:   37:   32768,        /* Overflow signed 16-bit                  */ \
+        -:   38:   65535,        /* Overflow unsig 16-bit when incremented  */ \
+        -:   39:   65536,        /* Overflow unsig 16 bit                   */ \
+        -:   40:   100663045,    /* Large positive number (endian-agnostic) */ \
+        -:   41:   2147483647    /* Overflow signed 32-bit when incremented */
+        -:   42:
+        -:   43:static int8_t  interesting_8[] = { INTERESTING_8 } ;
+        -:   44:static int16_t interesting_16[] = { INTERESTING_8 ,INTERESTING_16 } ;
+        -:   45:static int32_t interesting_32[] = { INTERESTING_8 ,INTERESTING_16 ,INTERESTING_32 } ;
+        -:   46:
+function create_inp called 0 returned 0% blocks executed 0%
+    #####:   47:void create_inp(char* random_inp,int * inp_size,input_arg_t inp_config){
+    #####:   48:    int string_length = rand()%(inp_config.f_max_len+1);
+call    0 never executed
+    #####:   49:    *inp_size = string_length; 
+    #####:   50:    for(int i = 0; i < string_length; i++){
+branch  0 never executed
+branch  1 never executed
+    #####:   51:        char tmp = rand()%(inp_config.f_char_range + 1) + inp_config.f_char_start;
+call    0 never executed
+    #####:   52:        random_inp[i] = tmp;
+        -:   53:    }
+    #####:   54:    random_inp[string_length] = '\0';
+    #####:   55:    return;
+        -:   56:}
+        -:   57://############################
+        -:   58:// single bit operation
+        -:   59://############################
+        -:   60:
+function flip_random called 0 returned 0% blocks executed 0%
+    #####:   61:int flip_random(char* str, char* target ,int str_size){
+    #####:   62:    if(str_size <= 0){
+branch  0 never executed
+branch  1 never executed
+    #####:   63:        perror("input is NULL");
+call    0 never executed
+    #####:   64:        return -1;
+        -:   65:    }
+        -:   66:
+    #####:   67:    if(memcpy(target,str,str_size) == NULL){
+branch  0 never executed
+branch  1 never executed
+    #####:   68:        perror("flip memcpy failed\n");
+call    0 never executed
+    #####:   69:        return -1;
+        -:   70:    }
+        -:   71:
+    #####:   72:    int bit_size[3] = {1,2,4};
+    #####:   73:    int times = 0;
+    #####:   74:    for(int i = 0; i < 3; i++){
+branch  0 never executed
+branch  1 never executed
+    #####:   75:        if(bit_size[2-i] < str_size){
+branch  0 never executed
+branch  1 never executed
+    #####:   76:            times = rand()%(3-i);
+call    0 never executed
+    #####:   77:            break;
+        -:   78:        }else{
+    #####:   79:            continue;
+        -:   80:        }       
+        -:   81:    }
+    #####:   82:    for(int i = 0; i < bit_size[times]; i++){
+branch  0 never executed
+branch  1 never executed
+    #####:   83:        int pos = rand()%str_size;
+call    0 never executed
+    #####:   84:        char c = str[pos];
+    #####:   85:        char bit = 1 << rand()%7;
+call    0 never executed
+    #####:   86:        char new_c = c^bit;
+    #####:   87:        target[pos] = new_c;
+        -:   88:    }
+        -:   89:
+    #####:   90:    target[str_size] ='\0';
+    #####:   91:    return str_size;
+        -:   92:} 
+        -:   93:
+        -:   94://#############################
+        -:   95://byte operator
+        -:   96://#############################
+        -:   97:
+function delete_random called 0 returned 0% blocks executed 0%
+    #####:   98:int delete_random(char* str,char* target, int str_size,int byte){
+    #####:   99:    if(str_size <= 0){
+branch  0 never executed
+branch  1 never executed
+    #####:  100:        perror("input is NULL");
+call    0 never executed
+    #####:  101:        return -1;
+        -:  102:    }
+        -:  103:
+        -:  104:    int pos;
+    #####:  105:    if(str_size == byte){
+branch  0 never executed
+branch  1 never executed
+    #####:  106:        pos = 0;
+        -:  107:    }else{
+    #####:  108:        pos = rand()%(str_size - byte);
+call    0 never executed
+        -:  109:    }
+        -:  110:
+    #####:  111:    if(memcpy(target,str,pos) == NULL){
+branch  0 never executed
+branch  1 never executed
+    #####:  112:        perror("delete 1 memcpy failed\n");
+call    0 never executed
+    #####:  113:        return -1;
+        -:  114:    }
+        -:  115:
+    #####:  116:    if(memcpy(target + pos,str + byte + pos , str_size-pos-byte + 1) == NULL){
+branch  0 never executed
+branch  1 never executed
+    #####:  117:        perror("delete 2 memcpy failed\n");
+call    0 never executed
+    #####:  118:        return -1;
+        -:  119:    }
+        -:  120:
+    #####:  121:    target[str_size-byte] ='\0';
+    #####:  122:    return str_size - 1;
+        -:  123:}
+        -:  124:
+function insert_random called 0 returned 0% blocks executed 0%
+    #####:  125:int insert_random(char* str, char* target, int str_size,int byte){
+    #####:  126:    int operator = rand()%3;
+call    0 never executed
+        -:  127:    int length;
+    #####:  128:    switch (operator)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  129:    {
+    #####:  130:    case 0:
+        -:  131:
+    #####:  132:        length = random_value(str,target,str_size,byte);
+call    0 never executed
+    #####:  133:        return length;
+    #####:  134:    case 1:
+        -:  135:
+    #####:  136:        length = simple_arithmatic_insert(str,target,str_size,byte);
+call    0 never executed
+    #####:  137:        return length;
+    #####:  138:    case 2:
+        -:  139:
+    #####:  140:        length = known_integers_insert(str,target,str_size,byte);
+call    0 never executed
+    #####:  141:        return length;
+    #####:  142:    default:
+    #####:  143:        break;
+        -:  144:    }
+    #####:  145:}
+        -:  146:
+function change_random called 0 returned 0% blocks executed 0%
+    #####:  147:int change_random(char* str, char* target, int str_size,int byte){
+    #####:  148:    int operator = rand()%4;
+call    0 never executed
+        -:  149:    int length;
+        -:  150:
+    #####:  151:    switch (operator)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+        -:  152:    {
+    #####:  153:    case 0:
+        -:  154: 
+    #####:  155:        length = byte_flip(str,target,str_size,byte);
+call    0 never executed
+    #####:  156:        return length;
+    #####:  157:    case 1:
+        -:  158:
+    #####:  159:        length = simple_arithmatic_change(str,target,str_size,byte);
+call    0 never executed
+    #####:  160:        return length;
+    #####:  161:    case 2:
+        -:  162:
+    #####:  163:        length = known_integers_change(str,target,str_size,byte);
+call    0 never executed
+    #####:  164:        return length;
+    #####:  165:    case 3:
+        -:  166:
+    #####:  167:        length = flip_random(str,target,str_size);
+call    0 never executed
+    #####:  168:        return length;
+    #####:  169:    default:
+    #####:  170:        break;
+        -:  171:    }
+    #####:  172:}
+        -:  173:
+function random_value called 0 returned 0% blocks executed 0%
+    #####:  174:int random_value(char* str, char* target, int str_size, int byte){
+    #####:  175:    if(str_size <= 0){
+branch  0 never executed
+branch  1 never executed
+    #####:  176:        perror("input is NULL");
+call    0 never executed
+    #####:  177:        return -1;
+        -:  178:    }
+        -:  179:
+        -:  180:    int pos;
+    #####:  181:    pos = rand()%str_size;
+call    0 never executed
+        -:  182:
+    #####:  183:    if(memcpy(target,str,pos) == NULL){
+branch  0 never executed
+branch  1 never executed
+    #####:  184:        perror("insert 1 memcpy failed\n");
+call    0 never executed
+    #####:  185:        return -1;
+        -:  186:    }
+        -:  187:
+    #####:  188:    for(int i = 0; i < byte; i++){
+branch  0 never executed
+branch  1 never executed
+    #####:  189:        char random_c = rand()%96 + 32;
+call    0 never executed
+    #####:  190:        target[pos + i] = random_c; 
+        -:  191:    }
+        -:  192:
+    #####:  193:    if(memcpy(target + pos + byte, str+pos ,str_size-pos) == NULL){
+branch  0 never executed
+branch  1 never executed
+    #####:  194:        perror("insert 3 memcpy failed\n");
+call    0 never executed
+    #####:  195:        return -1;
+        -:  196:    }
+        -:  197:
+    #####:  198:    target[str_size+byte] ='\0';
+    #####:  199:    return str_size + byte;
+        -:  200:}
+        -:  201:
+function byte_flip called 0 returned 0% blocks executed 0%
+    #####:  202:int byte_flip(char* str, char* target ,int str_size,int byte){
+    #####:  203:    if(str_size <= 0){
+branch  0 never executed
+branch  1 never executed
+    #####:  204:        perror("input is NULL");
+call    0 never executed
+    #####:  205:        return -1;
+        -:  206:    }
+        -:  207:
+    #####:  208:    if(memcpy(target,str,str_size) == NULL){
+branch  0 never executed
+branch  1 never executed
+    #####:  209:        perror("flip memcpy failed\n");
+call    0 never executed
+    #####:  210:        return -1;
+        -:  211:    }
+        -:  212:
+        -:  213:    char new_char;
+        -:  214:    int pos;
+    #####:  215:    if(str_size == byte){
+branch  0 never executed
+branch  1 never executed
+    #####:  216:        pos = 0;
+        -:  217:    }else{
+    #####:  218:        pos = rand()%(str_size-byte);
+call    0 never executed
+        -:  219:    }
+        -:  220:    
+    #####:  221:    for(int i = 0; i < byte ; i++){
+branch  0 never executed
+branch  1 never executed
+    #####:  222:        new_char = (char) str[pos + i] ^ 0xff;
+    #####:  223:        target[pos + i] = new_char;
+        -:  224:   }
+    #####:  225:    target[str_size] = 0x0;
+    #####:  226:    return str_size;
+        -:  227:}
+        -:  228:
+function simple_arithmatic_insert called 0 returned 0% blocks executed 0%
+    #####:  229:int simple_arithmatic_insert(char* str,char* target,int str_size,int byte){
+    #####:  230:    if(str_size <= 0){
+branch  0 never executed
+branch  1 never executed
+    #####:  231:        perror("input is NULL");
+call    0 never executed
+    #####:  232:        return -1;
+        -:  233:    }
+        -:  234:
+    #####:  235:    int pos = rand()% str_size;
+call    0 never executed
+    #####:  236:    if(memcpy(target,str,pos) == NULL){
+branch  0 never executed
+branch  1 never executed
+    #####:  237:        perror("simple arithmatic insert memcpy failed\n");
+call    0 never executed
+    #####:  238:        return -1;
+        -:  239:    }
+    #####:  240:    for(int i = 0; i < byte ; i++){
+branch  0 never executed
+branch  1 never executed
+    #####:  241:        int val = rand()%71 - 35;
+call    0 never executed
+    #####:  242:        target[pos + i] = (str[pos] + val);
+        -:  243:    }
+    #####:  244:    if(memcpy(target + pos + byte , str + pos , str_size - pos) == NULL){
+branch  0 never executed
+branch  1 never executed
+    #####:  245:        perror("simple arithmatic insert2 memcpy failed\n");
+call    0 never executed
+    #####:  246:        return -1;
+        -:  247:    }
+    #####:  248:    target[str_size + byte] = '\0';
+    #####:  249:    return str_size + byte;
+        -:  250:}
+        -:  251:
+function simple_arithmatic_change called 0 returned 0% blocks executed 0%
+    #####:  252:int simple_arithmatic_change(char* str,char* target,int str_size,int byte){
+    #####:  253:    if(str_size <= 0){
+branch  0 never executed
+branch  1 never executed
+    #####:  254:        perror("input is NULL");
+call    0 never executed
+    #####:  255:        return -1;
+        -:  256:    }
+        -:  257:    int pos;
+    #####:  258:    if(str_size == byte){
+branch  0 never executed
+branch  1 never executed
+    #####:  259:        pos = 0;
+        -:  260:    }else{
+    #####:  261:        pos = rand()% (str_size-byte);
+call    0 never executed
+        -:  262:    }
+    #####:  263:    if(memcpy(target,str,pos) == NULL){
+branch  0 never executed
+branch  1 never executed
+    #####:  264:        perror("simple arithmatic insert memcpy failed\n");
+call    0 never executed
+    #####:  265:        return -1;
+        -:  266:    }
+    #####:  267:    for(int i = 0; i < byte ; i++){
+branch  0 never executed
+branch  1 never executed
+    #####:  268:        int val = rand()%71 - 35;
+call    0 never executed
+    #####:  269:        target[pos + i] = (str[pos + i] + val);
+        -:  270:    }
+    #####:  271:    if(memcpy(target + pos + byte , str + pos + byte , str_size - pos - byte) == NULL){
+branch  0 never executed
+branch  1 never executed
+    #####:  272:        perror("simple arithmatic insert2 memcpy failed\n");
+call    0 never executed
+    #####:  273:        return -1;
+        -:  274:    }
+    #####:  275:    target[str_size] = '\0';
+    #####:  276:    return str_size;
+        -:  277:}
+        -:  278:
+        -:  279:
+function known_integers_insert called 100 returned 100% blocks executed 60%
+      100:  280:int known_integers_insert(char* str, char* target ,int str_size,int byte){
+        -:  281:
+      100:  282:    if(str_size <= 0){
+branch  0 taken 0 (fallthrough)
+branch  1 taken 100
+    #####:  283:        perror("input is NULL");
+call    0 never executed
+    #####:  284:        return -1;
+        -:  285:    }
+        -:  286:
+      100:  287:    int known_integer[] = { 9, 19 ,27};
+      100:  288:    int pos = rand()%str_size;
+call    0 returned 100
+      100:  289:    int category = rand()%3;
+call    0 returned 100
+      100:  290:    int index = rand()%known_integer[category];
+call    0 returned 100
+      100:  291:    if(memcpy(target,str,pos) == NULL){
+branch  0 taken 0 (fallthrough)
+branch  1 taken 100
+    #####:  292:        perror("flip memcpy failed\n");
+call    0 never executed
+    #####:  293:        return -1;
+        -:  294:    }
+        -:  295:
+        -:  296:    int check;
+      100:  297:    switch (category)
+branch  0 taken 0
+branch  1 taken 68
+branch  2 taken 32
+branch  3 taken 0
+        -:  298:    {
+    #####:  299:    case 0:
+    #####:  300:        *(int8_t*)(target + pos) = interesting_8[index];
+    #####:  301:        break;
+        -:  302:    
+       68:  303:    case 1:
+       68:  304:        *(int16_t*)(target + pos) = interesting_16[index];
+       68:  305:        break;
+       32:  306:    case 2 :
+       32:  307:        *(int32_t*)(target + pos) = interesting_32[index];
+       32:  308:        break;
+    #####:  309:    default:
+    #####:  310:        break;
+        -:  311:    }
+        -:  312:
+      100:  313:    if(memcpy(target + pos + byte, str + pos, str_size - pos +1 ) == NULL){
+branch  0 taken 0 (fallthrough)
+branch  1 taken 100
+    #####:  314:        perror("flip memcpy failed\n");
+call    0 never executed
+    #####:  315:        return -1;
+        -:  316:    }
+      100:  317:    target[str_size + byte] = 0x0;
+      100:  318:    return str_size + byte;
+        -:  319:}
+        -:  320:
+function known_integers_change called 0 returned 0% blocks executed 0%
+    #####:  321:int known_integers_change(char* str, char* target ,int str_size,int byte){
+    #####:  322:    if(str_size <= 0){
+branch  0 never executed
+branch  1 never executed
+    #####:  323:        perror("input is NULL");
+call    0 never executed
+    #####:  324:        return -1;
+        -:  325:    }
+        -:  326:
+    #####:  327:    if(memcpy(target,str,str_size) == NULL){
+branch  0 never executed
+branch  1 never executed
+    #####:  328:        perror("flip memcpy failed\n");
+call    0 never executed
+    #####:  329:        return -1;
+        -:  330:    }
+        -:  331:
+    #####:  332:    int known_integer[] = { 9, 10 ,8};
+        -:  333:    int pos;
+    #####:  334:    if(str_size == byte){
+branch  0 never executed
+branch  1 never executed
+    #####:  335:        pos = 0;
+        -:  336:    }else{
+    #####:  337:        pos = rand()%(str_size - byte);
+call    0 never executed
+        -:  338:    }
+        -:  339:
+    #####:  340:    int category = rand()%3;
+call    0 never executed
+    #####:  341:    int index = rand()%known_integer[category];
+call    0 never executed
+        -:  342:
+        -:  343:    char new_char;
+    #####:  344:    switch (category)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  345:    {
+    #####:  346:    case 0:
+    #####:  347:        *(int8_t*)(target + pos) = interesting_8[index];
+    #####:  348:        break;
+        -:  349:    
+    #####:  350:    case 1:
+    #####:  351:        *(int16_t*)(target + pos) = interesting_16[index];
+    #####:  352:        break;
+        -:  353:
+    #####:  354:    case 2 :
+    #####:  355:        *(int32_t*)(target + pos) = interesting_32[index];
+    #####:  356:        break;
+    #####:  357:    default:
+    #####:  358:        break;
+        -:  359:    }
+        -:  360:
+    #####:  361:    target[pos] = new_char;
+    #####:  362:    target[str_size] = 0x0;
+        -:  363:
+    #####:  364:    return str_size;
+        -:  365:}
+        -:  366:
+        -:  367:
+function mutate called 0 returned 0% blocks executed 0%
+    #####:  368:int mutate(char* str,char* target,int str_size){
+        -:  369:
+    #####:  370:    int random_num = rand()%3;
+call    0 never executed
+        -:  371:
+    #####:  372:    int byte_size[3] = {1,2,4};
+    #####:  373:    int byte = 0;
+    #####:  374:    for(int i = 0; i < str_size ; i++){
+branch  0 never executed
+branch  1 never executed
+    #####:  375:        if(byte_size[2-i] <= str_size){
+branch  0 never executed
+branch  1 never executed
+    #####:  376:           byte = rand()%(3-i);
+call    0 never executed
+    #####:  377:           break;
+        -:  378:        }
+        -:  379:    }
+        -:  380:
+    #####:  381:    if(random_num == 0){
+branch  0 never executed
+branch  1 never executed
+        -:  382:
+    #####:  383:       return delete_random(str,target,str_size,byte_size[byte]);
+call    0 never executed
+        -:  384:
+    #####:  385:    }else if(random_num == 1){
+branch  0 never executed
+branch  1 never executed
+        -:  386:
+    #####:  387:       return insert_random(str,target,str_size,byte_size[byte]);
+call    0 never executed
+        -:  388:
+        -:  389:    }else{
+        -:  390:
+    #####:  391:       return change_random(str,target,str_size,byte_size[byte]);
+call    0 never executed
+        -:  392:
+        -:  393:    }
+        -:  394:
+        -:  395:    return - 1;
+        -:  396:}
