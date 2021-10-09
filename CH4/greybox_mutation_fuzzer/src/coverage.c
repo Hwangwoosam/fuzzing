@@ -99,7 +99,6 @@ int coverage_execute(char* exc_name){
         exit(1);
     }else if(pid > 0){
         wait(&status);
-        printf("execute complete\n");
     }else{
         perror("compile failed\n");
         exit(1);
@@ -199,12 +198,23 @@ void read_gcov(coverage_set_t* cover_set,config_t* config,char* random, int rand
 
         while(!feof(fp)){
 
-            if((s = getline(&line,&len,fp)) != -1){
-
+            if((s = getline(&line,&len,fp)) > 0){
+                
                 memset(str_cpy,0,BUFFER_SIZE);
                 strcpy(str_cpy,line);
 
-                if(strstr(str_cpy,":")){
+                if(strstr(str_cpy,"branch"))
+                {
+                    if(strstr(str_cpy,"take")){
+                        if(cover_set->branch_check[src_num][t_branch] == 0){
+                            cover_set->branch_check[src_num][t_branch] = 1;
+                            cover_set->total_excute_branch[src_num]++;
+                            n_flag = 1;
+                        }
+                        e_branch++;
+                    }
+                    t_branch++;
+                }else{
 
                     token = strtok(str_cpy,":");
                     int execution = atoi(token);
@@ -219,20 +229,36 @@ void read_gcov(coverage_set_t* cover_set,config_t* config,char* random, int rand
                         }
                         e_line++;
                     }
-
-                }else{
-                    if(strstr(str_cpy,"branch")){
-                        if(strstr(str_cpy,"take")){
-                            if(cover_set->branch_check[src_num][t_branch] == 0){
-                                cover_set->branch_check[src_num][t_branch] = 1;
-                                cover_set->total_excute_branch[src_num]++;
-                                n_flag = 1;
-                            }
-                            e_branch++;
-                        }
-                        t_branch++;
-                    }
                 }
+                // if(strstr(str_cpy,":")){
+
+                    // token = strtok(str_cpy,":");
+                    // int execution = atoi(token);
+                    
+                //     if(execution > 0){
+                //         token = strtok(NULL,":");
+                //         line_num = atoi(token);
+                //         if(cover_set->line_check[src_num][line_num] == 0){
+                //             cover_set->line_check[src_num][line_num] = 1;
+                //             cover_set->total_excute_line[src_num]++;
+                //             n_flag = 1;
+                //         }
+                //         e_line++;
+                //     }
+
+                // }else{
+                //     if(strstr(str_cpy,"branch")){
+                //         if(strstr(str_cpy,"take")){
+                //             if(cover_set->branch_check[src_num][t_branch] == 0){
+                //                 cover_set->branch_check[src_num][t_branch] = 1;
+                //                 cover_set->total_excute_branch[src_num]++;
+                //                 n_flag = 1;
+                //             }
+                //             e_branch++;
+                //         }
+                //         t_branch++;
+                //     }
+                // }
             }
         }
         if(n_flag == 1){
