@@ -32,15 +32,13 @@ typedef struct run_arg{
 }run_arg_t;
 
 typedef struct config{
-    input_arg_t inp_arg;
-    run_arg_t run_arg;
-
+    
     int coverage;
     int trial;
     int (* oracle)(char* dir_name,int trial,int ret_code);
     
 }config_t;
 
-void init_config(config_t *);
+void init_config(config_t * config,run_arg_t* run_arg,input_arg_t* inp_arg);
 
 #endif
