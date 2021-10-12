@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include "../include/sched.h"
 
-int sched_init(config_t* config,sched_info_t* sched_info){
-    sched_info->list_length = config->run_arg.seed_file_num;
+int sched_init(run_arg_t run_arg,sched_info_t* sched_info){
+    sched_info->list_length = run_arg.seed_file_num;
 
     sched_info->energy = (int*)malloc(sizeof(int)*sched_info->list_length);
     // sched_info->nor_energy = (float*)malloc(sizeof(float)*sched_info->list_length);
@@ -42,7 +42,8 @@ int normalized_energy(sched_info_t* sched_info){
     return sum;
 }
 
-int choose(config_t* config,sched_info_t* sched_info){
+int choose(run_arg_t run_arg,sched_info_t* sched_info){
+    sched_init(run_arg,sched_info);
     assign_energy(sched_info);
     
     int sum = normalized_energy(sched_info);
@@ -50,7 +51,6 @@ int choose(config_t* config,sched_info_t* sched_info){
     float cumulate = 0;
 
     for(int i = 0 ; i < sched_info->list_length; i++){
-        float before = cumulate;
         cumulate += sched_info->energy[i] ;
         if(r < cumulate){
             return i;

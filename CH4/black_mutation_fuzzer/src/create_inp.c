@@ -45,7 +45,7 @@ static int16_t interesting_16[] = { INTERESTING_8 ,INTERESTING_16 } ;
 static int32_t interesting_32[] = { INTERESTING_8 ,INTERESTING_16 ,INTERESTING_32 } ;
 
 void create_inp(char* random_inp,int * inp_size,input_arg_t inp_config){
-    int string_length = rand()%(inp_config.f_max_len+1);
+    int string_length = rand()%(inp_config.f_max_len - inp_config.f_min_len +1) + inp_config.f_min_len;
     *inp_size = string_length; 
     for(int i = 0; i < string_length; i++){
         char tmp = rand()%(inp_config.f_char_range + 1) + inp_config.f_char_start;
@@ -87,7 +87,7 @@ int flip_random(char* str, char* target ,int str_size){
         target[pos] = new_c;
     }
 
-    target[str_size-1] ='\0';
+    target[str_size] ='\0';
     return str_size;
 } 
 
@@ -118,7 +118,7 @@ int delete_random(char* str,char* target, int str_size,int byte){
         return -1;
     }
 
-    target[str_size-byte - 1] ='\0';
+    target[str_size-byte] ='\0';
     return str_size - byte;
 }
 
@@ -195,7 +195,7 @@ int random_value(char* str, char* target, int str_size, int byte){
         return -1;
     }
 
-    target[str_size + byte - 1] ='\0';
+    target[str_size + byte] ='\0';
     return str_size + byte;
 }
 
@@ -222,7 +222,7 @@ int byte_flip(char* str, char* target ,int str_size,int byte){
         new_char = (char) str[pos + i] ^ 0xff;
         target[pos + i] = new_char;
    }
-    target[str_size - 1] = '\0';
+    target[str_size] = '\0';
     return str_size;
 }
 
@@ -245,7 +245,7 @@ int simple_arithmatic_insert(char* str,char* target,int str_size,int byte){
         perror("simple arithmatic insert2 memcpy failed\n");
         return -1;
     }
-    target[str_size + byte - 1] = '\0';
+    target[str_size + byte] = '\0';
     return str_size + byte;
 }
 
@@ -272,7 +272,7 @@ int simple_arithmatic_change(char* str,char* target,int str_size,int byte){
         perror("simple arithmatic insert2 memcpy failed\n");
         return -1;
     }
-    target[str_size - 1] = '\0';
+    target[str_size] = '\0';
     return str_size;
 }
 
@@ -314,7 +314,7 @@ int known_integers_insert(char* str, char* target ,int str_size,int byte){
         perror("flip memcpy failed\n");
         return -1;
     }
-    target[str_size + byte - 1] = '\0';
+    target[str_size + byte] = '\0';
     return str_size + byte;
 }
 
@@ -359,7 +359,7 @@ int known_integers_change(char* str, char* target ,int str_size,int byte){
     }
 
     target[pos] = new_char;
-    target[str_size - 1] = '\0';
+    target[str_size] = '\0';
 
     return str_size;
 }
