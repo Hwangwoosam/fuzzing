@@ -44,10 +44,10 @@ int src_dir_length = strlen(run_arg.src_dir);
         cover_set->code_size[i] = get_code_line(gcov_file);
 
         //total line number
-        cover_set->line_check[i]= (int*)malloc(sizeof(int)*cover_set->code_size[i][0]);
+        cover_set->line_check[i]= (int*)malloc(sizeof(int)*cover_set->code_size[i][1]);
 
         //total branch number
-        cover_set->branch_check[i] = (int*)malloc(sizeof(int)*cover_set->code_size[i][1]);
+        cover_set->branch_check[i] = (int*)malloc(sizeof(int)*cover_set->code_size[i][2]);
 
         //total execute line check each trial
         cover_set->e_line_check[i] = (int*)malloc(sizeof(int)*config->trial);
@@ -57,8 +57,8 @@ int src_dir_length = strlen(run_arg.src_dir);
 
         memset(cover_set->e_line_check[i],0,sizeof(int)*config->trial);
         memset(cover_set->e_branch_check[i],0,sizeof(int)*config->trial);
-        memset(cover_set->line_check[i],0,sizeof(int)*cover_set->code_size[i][0]);
-        memset(cover_set->branch_check[i],0,sizeof(int)*cover_set->code_size[i][1]);
+        memset(cover_set->line_check[i],0,sizeof(int)*cover_set->code_size[i][1]);
+        memset(cover_set->branch_check[i],0,sizeof(int)*cover_set->code_size[i][2]);
         free(gcov_file);
     }
 }
@@ -178,6 +178,7 @@ void read_gcov(coverage_set_t* cover_set,run_arg_t* run_arg,char* random, int ra
 
         char* token;
         int e_line=0;
+        int t_branch = 0;
         int e_branch = 0;
         int line_num = 0;
 
@@ -193,13 +194,14 @@ void read_gcov(coverage_set_t* cover_set,run_arg_t* run_arg,char* random, int ra
                 if(strstr(line,"branch"))
                 {
                     if(strstr(line,"take")){
-                        if(cover_set->branch_check[src_num][e_branch] == 0){
-                            cover_set->branch_check[src_num][e_branch] = 1;
+                        if(cover_set->branch_check[src_num][t_branch] == 0){
+                            cover_set->branch_check[src_num][t_branch] = 1;
                             cover_set->total_excute_branch[src_num]++;
                             n_flag = 1;
                         }
                         e_branch++;
                     }
+                    t_branch++;
                 }else{
 
                     token = strtok(line,":");
@@ -256,10 +258,11 @@ int* get_code_line(char* path){
 
     int execute_line = 0;
     int total_branch = 0;
+    int num = 0;
 
     char* line = NULL;
     size_t len = 0;
-    int* size = (int*)malloc(sizeof(int)*2);
+    int* size = (int*)malloc(sizeof(int)*3);
     char* ptr;
 
     FILE* fp = fopen(path,"rb");
@@ -270,6 +273,10 @@ int* get_code_line(char* path){
     }
     while(!feof(fp) && getline(&line,&len,fp) != 1){
         
+        if(strstr(line,":")){
+            num++;
+        }
+
         if(strstr(line,"####")){
             execute_line++;
         }else if(strstr(line,"branch")){
@@ -280,7 +287,8 @@ int* get_code_line(char* path){
     fclose(fp);
     
     size[0] = execute_line;
-    size[1] = total_branch;
+    size[1] = num - 4;
+    size[2] = total_branch;
 
     return size;
 }
