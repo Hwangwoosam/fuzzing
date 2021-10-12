@@ -670,7 +670,7 @@ void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_in
         // printf("accumulate: \n");
         for(int j = 0; j <run_arg.src_file_num; j++){  
 
-            fprintf(fp,"total,%0.3f%%,%0.3f%%\n",(float)(cover_set.total_excute_line[j]*100)/(float)cover_set.code_size[j][0],(float)(cover_set.total_excute_branch[j]*100)/(float)cover_set.code_size[j][1]);
+            fprintf(fp,"total,%0.3f%%,%0.3f%%\n",(float)(cover_set.total_excute_line[j]*100)/(float)cover_set.code_size[j][1],(float)(cover_set.total_excute_branch[j]*100)/(float)cover_set.code_size[j][2]);
             
         }
         fclose(fp);
