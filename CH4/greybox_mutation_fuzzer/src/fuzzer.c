@@ -646,7 +646,7 @@ void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_in
     printf("trial: %d\nPassed: %d\nFailed: %d\n",test_config.trial,passed,failed);
     printf("==================================================\n");
     if(test_config.coverage == 1){
-        FILE * fp = fopen("result_summary.csv","ab");
+        FILE * fp = fopen("result_summary.csv","wb");
         
         if(fp == NULL){
             perror("result file failed\n");
@@ -658,7 +658,7 @@ void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_in
 
             for(int j = 0; j < run_arg.src_file_num; j++){
 
-                fprintf(fp,"%d,%0.3f%%,%0.3f%%",i+1,total_coverage[j][i],total_br_coverage[j][i]);
+                fprintf(fp,"%d,%0.1f,%0.1f",i+1,total_coverage[j][i],total_br_coverage[j][i]);
                 if(j + 1 < run_arg.src_file_num){
                     fprintf(fp,",");
                 }
