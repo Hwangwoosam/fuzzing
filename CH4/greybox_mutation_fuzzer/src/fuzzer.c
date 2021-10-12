@@ -479,15 +479,15 @@ char* create_candidate(run_arg_t run_arg,sched_info_t* sched_info,int* inp_size)
 
     candidate[run_arg.seed_length[seed_idx]-1] = '\0';
 
-    int trial = 1 << rand()%5 + 1;
+    // int trial = 1 << rand()%5 + 1;
     
     int candidate_length = strlen(candidate);
     
-    if(candidate_length < trial){
-        trial = candidate_length;
-    }
+    // if(candidate_length < trial){
+        // trial = candidate_length;
+    // }
 
-    int length = 0;
+    int length = candidate_length;
 
     char buf[BUFFER_SIZE];
 
@@ -526,7 +526,7 @@ void sellect_candidate(run_arg_t run_arg,sched_info_t* sched_info,char* inp, int
         *seed_idx = *seed_idx + 1;
 
     }else{
-        
+
         char* candidate = create_candidate(run_arg,sched_info,inp_size);
 
         if(memcpy(inp,candidate,*inp_size) == NULL){
@@ -553,7 +553,7 @@ void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_in
     }
     
     struct itimerval t;
-    time_t start,end,start1,end1,start2,end2;
+    time_t start,end;
     signal(SIGALRM,timeout_handler);
 
     //####
@@ -565,8 +565,6 @@ void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_in
         total_br_coverage[i] = (float*)malloc(sizeof(float)*test_config.trial);
     }
     //###
-    double excution1 = 0;
-    double excution2 = 0;
 
     start = clock();
 
@@ -584,6 +582,7 @@ void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_in
         int random_size = 0;
 
         sellect_candidate(run_arg,&sched_info,random_inp,&random_size,&seed_idx);
+
         if(random_size < 0){
             perror("random input create failed\n");
             exit(1);
@@ -605,15 +604,15 @@ void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_in
         }
 
         //#3 fuzzer_run();
-        start1 = clock();
+
         int return_code = run(run_arg,random_inp,random_size,i);
-        end1 =clock();
-        excution1 = excution1 + (float)(end1-start1)/CLOCKS_PER_SEC;
+
 
         //#4 fuzzer_oracle;
         test_config.oracle(tmp_dir_name,i,return_code);
 
-        start2 = clock();
+
+
         if(test_config.coverage == 1){
 
             for(int j = 0; j < run_arg.src_file_num; j++){
@@ -624,12 +623,11 @@ void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_in
 
                 reset_gcda(run_arg,j);
 
-                total_coverage[j][i] = ((float)cover_set.total_excute_line[j]/(float)cover_set.code_size[j][0])*100;
-                total_br_coverage[j][i] = ((float)cover_set.total_excute_branch[j]/(float)cover_set.code_size[j][1])*100;
+                total_coverage[j][i] = (float)cover_set.total_excute_line[j];
+                total_br_coverage[j][i] = (float)cover_set.total_excute_branch[j];
             }
         }
-        end2 =clock();
-        excution2 = excution2 + (float)(end2-start2)/CLOCKS_PER_SEC;
+
         if(return_code == 0){
             passed++;
         }else if(return_code > 0){
@@ -643,14 +641,12 @@ void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_in
 
     printf("===================result summary=================\n");
     printf("excution time: %f\n",excution);
-    printf("excution time: %f\n",excution1);
-    printf("excution time: %f\n",excution2);
     printf("running program per sec: %f\n",test_config.trial/excution);
     printf("failed percentage: %f%%\n",(failed/(float)test_config.trial)*100);
     printf("trial: %d\nPassed: %d\nFailed: %d\n",test_config.trial,passed,failed);
     printf("==================================================\n");
     if(test_config.coverage == 1){
-        FILE * fp = fopen("result_summary.csv","wb");
+        FILE * fp = fopen("result_summary.csv","ab");
         
         if(fp == NULL){
             perror("result file failed\n");
