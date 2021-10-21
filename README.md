@@ -1,4 +1,4 @@
-# study of the fuzzing book
+# Study of the fuzzing book
 
 [CH1:Introduction to Software Testing](https://github.com/Hwangwoosam/fuzzing/tree/master/CH1)
 
