@@ -1,4 +1,5 @@
-# study of fuzzing
+# Study of the fuzzing book
+
 [CH1:Introduction to Software Testing](https://github.com/Hwangwoosam/fuzzing/tree/master/CH1)
 
 [CH2:Fuzzing: Breaking Things with Random Inputs && Code Coverage](https://github.com/Hwangwoosam/fuzzing/tree/master/CH2)
