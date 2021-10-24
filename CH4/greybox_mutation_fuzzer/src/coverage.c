@@ -194,12 +194,19 @@ void read_gcov(coverage_set_t* cover_set,run_arg_t* run_arg,char* random, int ra
                 if(strstr(line,"branch"))
                 {
                     if(strstr(line,"take")){
-                        if(cover_set->branch_check[src_num][t_branch] == 0){
-                            cover_set->branch_check[src_num][t_branch] = 1;
-                            cover_set->total_excute_branch[src_num]++;
-                            n_flag = 1;
+                        token = strtok(line," ");
+                        for(int i = 0; i < 3; i ++){
+                            token = strtok(NULL," ");
                         }
-                        e_branch++;
+                        if(atoi(token) > 0){
+                            e_branch++;
+
+                            if(cover_set->branch_check[src_num][t_branch] == 0){
+                                cover_set->branch_check[src_num][t_branch] = 1;
+                                cover_set->total_excute_branch[src_num]++;
+                                n_flag = 1;
+                            }
+                        }
                     }
                     t_branch++;
                 }else{
@@ -210,8 +217,8 @@ void read_gcov(coverage_set_t* cover_set,run_arg_t* run_arg,char* random, int ra
                     if(execution > 0){
                         token = strtok(NULL,":");
                         line_num = atoi(token);
-                        if(cover_set->line_check[src_num][e_line] == 0){
-                            cover_set->line_check[src_num][e_line] = 1;
+                        if(cover_set->line_check[src_num][line_num] == 0){
+                            cover_set->line_check[src_num][line_num] = 1;
                             cover_set->total_excute_line[src_num]++;
                             n_flag = 1;
                         }
