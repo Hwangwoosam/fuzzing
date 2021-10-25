@@ -2,7 +2,7 @@
 #define CONFIG
 #define PATH_MAX 4096
 
-#define NUM_OF_MAX 100
+#define NUM_OF_MAX 1024
 #define BUFFER_SIZE 4096
 #define FILE_NAME_MAX 1024
 
