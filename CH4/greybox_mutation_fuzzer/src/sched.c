@@ -1,22 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
 #include "../include/sched.h"
 
-int sched_init(run_arg_t run_arg,sched_info_t* sched_info){
-    sched_info->list_length = run_arg.seed_file_num;
-
-    sched_info->energy = (int*)malloc(sizeof(int)*sched_info->list_length);
-    // sched_info->nor_energy = (float*)malloc(sizeof(float)*sched_info->list_length);
+int sched_init(run_arg_t* run_arg,sched_info_t* sched_info){
+    sched_info->list_length = run_arg->seed_file_num;
+    sched_info->current_idx = 0;
+    sched_info->sum = 0 ;
+    sched_info->energy = (float*)malloc(sizeof(float)*NUM_OF_MAX);
     
+    for(int i = 0; i < NUM_OF_MAX; i++){
+        sched_info->path_fre[i] = 1;
+    }
+
     if(sched_info->energy == NULL){
         perror("init energy malloc failed\n");
         return 1;
     }
-
-    // if(sched_info->nor_energy == NULL){
-    //     perror("init nor_energy malloc failed\n");
-    //     return 1;
-    // }
 
     return 0;
 }
@@ -24,34 +25,20 @@ int sched_init(run_arg_t run_arg,sched_info_t* sched_info){
 void assign_energy(sched_info_t* sched_info){
 
     for(int i = 0; i < sched_info->list_length; i++){
-        sched_info->energy[i] = 1;
+
+        sched_info->energy[i] = (float)1/(float)pow(sched_info->path_fre[i],0.7);
+        sched_info->sum += sched_info->energy[i];
     }
 
-}
-
-int normalized_energy(sched_info_t* sched_info){
-
-    int sum = 0;
-    for(int i = 0; i < sched_info->list_length; i++){
-        sum += sched_info->energy[i];
-    }
-    // for(int i = 0; i < sched_info->list_length; i++ ){
-    //     sched_info->nor_energy[i] = (float)sched_info->energy[i]/(float)sum;
-    // }
-
-    return sum;
 }
 
 int choose(run_arg_t run_arg,sched_info_t* sched_info){
-    sched_init(run_arg,sched_info);
-    assign_energy(sched_info);
-    
-    int sum = normalized_energy(sched_info);
-    int r = rand()%sum;
+     assign_energy(sched_info);
+    int r = rand()%100;
     float cumulate = 0;
 
     for(int i = 0 ; i < sched_info->list_length; i++){
-        cumulate += sched_info->energy[i] ;
+        cumulate += (sched_info->energy[i]/sched_info->sum)*100;
         if(r < cumulate){
             return i;
         }

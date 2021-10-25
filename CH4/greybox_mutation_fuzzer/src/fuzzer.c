@@ -10,11 +10,12 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
+#include <math.h>
 
 #include "../include/create_inp.h"
 #include "../include/fuzzer.h"
 #include "../include/coverage.h"
-#include "../include/sched.h"
+
 
 static config_t test_config;
 static input_arg_t inp_arg;
@@ -263,7 +264,6 @@ void seed_search(run_arg_t* run_config){
         }
     }
     run_config->seed_file_num = idx;
-
     free(path);
     closedir(dp);
 }
@@ -469,6 +469,7 @@ void config_free(run_arg_t* run, input_arg_t* inp){
 char* create_candidate(run_arg_t run_arg,sched_info_t* sched_info,int* inp_size){
     
     int seed_idx = choose(run_arg,sched_info);
+    sched_info->current_idx = seed_idx;
 
     char* candidate = (char*)malloc(sizeof(char)*BUFFER_SIZE);
 
@@ -479,30 +480,27 @@ char* create_candidate(run_arg_t run_arg,sched_info_t* sched_info,int* inp_size)
 
     candidate[run_arg.seed_length[seed_idx]-1] = '\0';
 
-    // int trial = 1 << rand()%5 + 1;
+    int trial = 1 << rand()%5 + 1;
     
     int candidate_length = strlen(candidate);
     
-    // if(candidate_length < trial){
-        // trial = candidate_length;
-    // }
+    if(candidate_length < trial){
+        trial = candidate_length;
+    }
 
     int length = candidate_length;
 
     char buf[BUFFER_SIZE];
 
-    if((length = mutate(candidate,buf,length))<= 0){
-        return candidate;
+    for(int i = 0; i <trial ; i++){
+       if((length = mutate(candidate,buf,length))<= 0){
+           printf("error\n");
+           return candidate;
+       }else{
+           memcpy(candidate,buf,length);
+           candidate[length - 1]='\0';
+       }
     }
-    // for(int i = 0; i <trial ; i++){
-    //    if((length = mutate(candidate,buf,length))<= 0){
-    //     //    printf("error\n");
-    //        return candidate;
-    //    }else{
-    //        memcpy(candidate,buf,length);
-    //        candidate[length - 1]='\0';
-    //    }
-    // }
     *inp_size = length;
 
     return candidate;
@@ -545,6 +543,7 @@ void sellect_candidate(run_arg_t run_arg,sched_info_t* sched_info,char* inp, int
 void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_inp_arg){
     srand(time(NULL));
     fuzzer_init(usr_config,usr_run_arg,usr_inp_arg);
+
     coverage_set_t cover_set;
     sched_info_t sched_info;
 
@@ -556,7 +555,8 @@ void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_in
     time_t start,end;
     signal(SIGALRM,timeout_handler);
 
-    //####
+    sched_init(&run_arg,&sched_info);
+
     float* total_coverage[NUM_OF_MAX];
     float* total_br_coverage[NUM_OF_MAX];
 
@@ -564,24 +564,23 @@ void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_in
         total_coverage[i] = (float*)malloc(sizeof(float)*test_config.trial);
         total_br_coverage[i] = (float*)malloc(sizeof(float)*test_config.trial);
     }
-    //###
+
+    int init_seed_num = run_arg.seed_file_num;
 
     start = clock();
-
-    int seed_idx = 0;
+    
     int length = 0;
     char random_inp[BUFFER_SIZE];
 
     for(int i = 0; i < test_config.trial ;i++){
 
         //#2 fuzzer_create_input();
-        sched_info.list_length = run_arg.seed_file_num;
 
         memset(random_inp,0,sizeof(char)*BUFFER_SIZE);
 
         int random_size = 0;
 
-        sellect_candidate(run_arg,&sched_info,random_inp,&random_size,&seed_idx);
+        sellect_candidate(run_arg,&sched_info,random_inp,&random_size,&sched_info.current_idx) ;
 
         if(random_size < 0){
             perror("random input create failed\n");
@@ -619,7 +618,7 @@ void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_in
 
                 coverage_gcov(run_arg.src_file[j],run_arg.src_dir);
 
-                read_gcov(&cover_set,&run_arg,random_inp,random_size,j,i);
+                read_gcov(&cover_set,&run_arg,&sched_info,random_inp,random_size,j,i);
 
                 reset_gcda(run_arg,j);
 
@@ -644,7 +643,13 @@ void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_in
     printf("running program per sec: %f\n",test_config.trial/excution);
     printf("failed percentage: %f%%\n",(failed/(float)test_config.trial)*100);
     printf("trial: %d\nPassed: %d\nFailed: %d\n",test_config.trial,passed,failed);
+
+    for(int i = 0; i < run_arg.seed_file_num; i++){
+        printf("(%d) seed: %0.4f\n",i,(sched_info.energy[i]/sched_info.sum)*100);
+    }
+    
     printf("==================================================\n");
+    
     if(test_config.coverage == 1){
         FILE * fp = fopen("result_summary.csv","wb");
         
@@ -659,36 +664,37 @@ void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_in
             for(int j = 0; j < run_arg.src_file_num; j++){
 
                 fprintf(fp,"%d,%0.1f,%0.1f",i+1,total_coverage[j][i],total_br_coverage[j][i]);
+                
                 if(j + 1 < run_arg.src_file_num){
                     fprintf(fp,",");
                 }
+
             }
             fprintf(fp,"\n");
         }
         float total_line;
         float total_branch;
-        // printf("accumulate: \n");
+
         for(int j = 0; j <run_arg.src_file_num; j++){  
 
             fprintf(fp,"total,%0.3f%%,%0.3f%%\n",(float)(cover_set.total_excute_line[j]*100)/(float)cover_set.code_size[j][1],(float)(cover_set.total_excute_branch[j]*100)/(float)cover_set.code_size[j][2]);
             
         }
         fclose(fp);
-        // printf("==================================================\n");
+
         int seed_dir_length = strlen(run_arg.seed_dir);
 
-        for(int j = 0; j < cover_set.branch_set.branch_length; j++){
+        for(int j = init_seed_num; j < run_arg.seed_file_num; j++){
 
             char* n_seed = (char*)malloc(sizeof(char) *(seed_dir_length + 11));
 
-            sprintf(n_seed,"%s/%d_new_seed",run_arg.seed_dir,j);
-            // printf("{ %s , %d }\n",cover_set.branch_set.input[j],cover_set.branch_set.line_num[j]);
+            sprintf(n_seed,"%s/%d_new_seed",run_arg.seed_dir,j-init_seed_num);
             
             int seed_dir = open(n_seed,O_RDWR | O_TRUNC |O_CREAT ,0600);
             int sent = 0;
 
-            while(sent < cover_set.branch_set.input_length[j]){
-                sent += write(seed_dir,cover_set.branch_set.input[j]+sent,cover_set.branch_set.input_length[j]-sent);
+            while(sent < run_arg.seed_length[j]){
+                sent += write(seed_dir,run_arg.seed_inp[j]+sent,run_arg.seed_length[j]-sent);
                 if(sent == -1){
                     perror("add seed failed\n");
                 }
@@ -714,5 +720,5 @@ void fuzzer_main(config_t* usr_config,run_arg_t* usr_run_arg,input_arg_t* usr_in
     }
 
     config_free(&run_arg,&inp_arg);
-    // delete_result();
+    delete_result();
 }

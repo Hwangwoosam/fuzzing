@@ -3,19 +3,14 @@
 
 void coverage_init(config_t* config,run_arg_t run_arg,coverage_set_t* cover_set){
 
-cover_set->branch_set.input = (char**)malloc(sizeof(char*)*config->trial);
+   
+    memset(cover_set->hashtable,0,65537);
 
-cover_set->branch_set.input_length = (int*)malloc(sizeof(int)*config->trial);
+    cover_set->total_excute_line = (int*)malloc(sizeof(int)*run_arg.src_file_num);
 
-cover_set->branch_set.line_num = (int*)malloc(sizeof(int)*config->trial);
+    cover_set->total_excute_branch =(int*)malloc(sizeof(int)*run_arg.src_file_num);
 
-cover_set->branch_set.branch_length = 0;
-
-cover_set->total_excute_line = (int*)malloc(sizeof(int)*run_arg.src_file_num);
-
-cover_set->total_excute_branch =(int*)malloc(sizeof(int)*run_arg.src_file_num);
-
-int src_dir_length = strlen(run_arg.src_dir);
+    int src_dir_length = strlen(run_arg.src_dir);
 
     for(int i = 0; i < run_arg.src_file_num; i++){
 
@@ -63,6 +58,19 @@ int src_dir_length = strlen(run_arg.src_dir);
     }
 }
 
+static unsigned short
+    sdbm(str)
+    unsigned char *str;
+    {
+        unsigned short hash = 0;
+        int c;
+
+        while (c = *str++)
+            hash = c + (hash << 6) + (hash << 16) - hash;
+
+        return hash;
+    }
+    
 int coverage_compile(char *test_file,char* exc_file){
     int pid = fork();
     int status;
@@ -155,7 +163,7 @@ int get_filename(char* file_name,char* target){
     return 0;
 }
 
-void read_gcov(coverage_set_t* cover_set,run_arg_t* run_arg,char* random, int random_size,int src_num,int trial){   
+void read_gcov(coverage_set_t* cover_set,run_arg_t* run_arg,sched_info_t* sched_info,char* random, int random_size,int src_num,int trial){   
     
     char src_file[FILE_NAME_MAX] = {0,};
     
@@ -188,25 +196,29 @@ void read_gcov(coverage_set_t* cover_set,run_arg_t* run_arg,char* random, int ra
         ssize_t s;
 
         while(!feof(fp)){
-
+            int hash = 0;
             if((s = getline(&line,&len,fp)) > 0){
+                hash = sdbm(line);
                 
                 if(strstr(line,"branch"))
                 {
                     if(strstr(line,"take")){
+
                         token = strtok(line," ");
+                        
                         for(int i = 0; i < 3; i ++){
                             token = strtok(NULL," ");
                         }
+                        
                         if(atoi(token) > 0){
                             e_branch++;
 
                             if(cover_set->branch_check[src_num][t_branch] == 0){
                                 cover_set->branch_check[src_num][t_branch] = 1;
                                 cover_set->total_excute_branch[src_num]++;
-                                n_flag = 1;
                             }
                         }
+                    
                     }
                     t_branch++;
                 }else{
@@ -220,16 +232,27 @@ void read_gcov(coverage_set_t* cover_set,run_arg_t* run_arg,char* random, int ra
                         if(cover_set->line_check[src_num][line_num] == 0){
                             cover_set->line_check[src_num][line_num] = 1;
                             cover_set->total_excute_line[src_num]++;
-                            n_flag = 1;
                         }
                         e_line++;
                     }
+
                 }
             }
+            
+            if(cover_set->hashtable[hash] != '1'){
+                sched_info->path_fre[sched_info->current_idx]++;
+                cover_set->hashtable[hash] = '1';
+                n_flag = 1;
+            }
+
         }
         fclose(fp);
 
         if(n_flag == 1){
+
+            sched_info->path_fre[run_arg->seed_file_num] = 1;
+            sched_info->path_fre[sched_info->current_idx]++;
+            sched_info->energy[run_arg->seed_file_num] = 1;
 
             run_arg->seed_inp[run_arg->seed_file_num] = (char*)malloc(sizeof(char)*BUFFER_SIZE);
             
@@ -239,18 +262,7 @@ void read_gcov(coverage_set_t* cover_set,run_arg_t* run_arg,char* random, int ra
             run_arg->seed_length[run_arg->seed_file_num] = random_size;
 
             run_arg->seed_file_num++;
-
-            int list_length = cover_set->branch_set.branch_length;
-
-            cover_set->branch_set.input[list_length] = (char*)malloc(sizeof(char)*BUFFER_SIZE);
-            
-            memcpy(cover_set->branch_set.input[list_length],random,random_size);
-
-            cover_set->branch_set.input[list_length][random_size] = '\0';
-
-            cover_set->branch_set.input_length[list_length] = random_size;
-            cover_set->branch_set.line_num[list_length] = line_num;
-            cover_set->branch_set.branch_length++;
+            sched_info->list_length++;
         }
 
         cover_set->e_branch_check[src_num][trial] = e_branch;
@@ -337,8 +349,4 @@ void coverage_free(coverage_set_t* cover_set,int num){
         free(cover_set->branch_check[i]);
     }
 
-    for(int i = 0; i < cover_set->branch_set.branch_length; i++){
-        free(cover_set->branch_set.input[i]);
-    }
-    free(cover_set->branch_set.line_num);
 }
