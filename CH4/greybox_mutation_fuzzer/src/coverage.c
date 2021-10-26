@@ -194,12 +194,12 @@ void read_gcov(coverage_set_t* cover_set,run_arg_t* run_arg,sched_info_t* sched_
                
         size_t len = 0;
         ssize_t s;
-
+        unsigned short hash = 0;
+        char* path_id = (char*)malloc(sizeof(char)*cover_set->code_size[src_num][2]+1);
+        printf("branch num: %d\n",cover_set->code_size[src_num][2]);
         while(!feof(fp)){
-            int hash = 0;
             if((s = getline(&line,&len,fp)) > 0){
-                hash = sdbm(line);
-                
+
                 if(strstr(line,"branch"))
                 {
                     if(strstr(line,"take")){
@@ -213,13 +213,20 @@ void read_gcov(coverage_set_t* cover_set,run_arg_t* run_arg,sched_info_t* sched_
                         if(atoi(token) > 0){
                             e_branch++;
 
+                            path_id[t_branch] = '1';
+
                             if(cover_set->branch_check[src_num][t_branch] == 0){
                                 cover_set->branch_check[src_num][t_branch] = 1;
                                 cover_set->total_excute_branch[src_num]++;
                             }
+                        }else{
+                            path_id[t_branch] = '0';
                         }
                     
+                    }else{
+                            path_id[t_branch] = '0';
                     }
+                    
                     t_branch++;
                 }else{
 
@@ -238,14 +245,20 @@ void read_gcov(coverage_set_t* cover_set,run_arg_t* run_arg,sched_info_t* sched_
 
                 }
             }
-            
-            if(cover_set->hashtable[hash] != '1'){
-                sched_info->path_fre[sched_info->current_idx]++;
-                cover_set->hashtable[hash] = '1';
-                n_flag = 1;
-            }
-
         }
+
+        path_id[t_branch] = '\0';
+        printf("bit: %s\n",path_id);
+        hash = sdbm(path_id);    
+        printf("hash: %x\n",hash);
+            
+        if(cover_set->hashtable[hash] != '1'){
+            sched_info->path_fre[sched_info->current_idx]++;
+            cover_set->hashtable[hash] = '1';
+            n_flag = 1;
+        }
+
+        free(path_id);
         fclose(fp);
 
         if(n_flag == 1){
