@@ -1,5 +1,7 @@
 #Chapter 1
 
+Learn the way how to mutate input in Fuzzing testing
+
 1.this chapter shows what is the software Testing and how to test the software
  
     1-1.Test the program on several, well-chosen inputs
